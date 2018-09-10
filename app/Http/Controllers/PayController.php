@@ -75,7 +75,7 @@ class PayController extends Controller
         return [
             'status' => true,
             'param' => $jsonParam,
-            'order' => ['id' => $order->id, 'orderId' => $orderId],
+            'order' => ['id' => $order->id, 'orderId' => $order->order_id],
         ];
     }
 
