@@ -64,7 +64,7 @@ class PayController extends Controller
         $order->user_id = $userId;
         $order->product_id = $productId;
         $order->order_id = $orderId;
-        $oder->pre_param = $jsApiParameters;
+        $order->pre_param = $jsApiParameters;
         $order->save();
 
         $jsonParam = json_decode($jsApiParameters, true);
