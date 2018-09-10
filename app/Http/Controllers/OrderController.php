@@ -12,6 +12,8 @@ class OrderController extends Controller
     {
         $responseCode = 'SUCCESS';
         $xmlData = file_get_contents('php://input');
+        Log::info('支付回调信息:');
+        Log::info($xmlData);
         if (!$xmlData) {
             Log::error('支付回调失败：没有接收到返回信息');
             $responseCode === 'FAIL';
