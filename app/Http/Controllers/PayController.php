@@ -39,33 +39,37 @@ class PayController extends Controller
             ->where('product_id', $productMod->id)
             ->first();
         if ($order) {
-            throw new Exception('同一个用户只能购买一次同种商品');
+            if ($order->isPay) {
+                throw new Exception('同一个用户只能购买一次同种商品');
+            }
+            $jsApiParameters = $order->pre_param;
+        } else {
+            $orderId = md5(Str::orderedUuid());
+            //②、统一下单
+            $input = new \WxPayUnifiedOrder();
+            $input->SetBody("校友说分享");
+            $input->SetAttach($productMod->title);
+            $input->SetDetail($productMod->desc);
+            $input->SetOut_trade_no($orderId);
+            $input->SetTotal_fee($productMod->price);
+            $input->SetTime_start(date("YmdHis"));
+            $input->SetTime_expire(date("YmdHis", time() + 600));
+            // $input->SetGoods_tag("测试商品");
+            $input->SetNotify_url("http://talktoalumni.com/api/orderNotify");
+            $input->SetTrade_type("JSAPI");
+            $input->SetOpenid($openId);
+
+            $config = new PayConfig();
+            $unifiedOrder = \WxPayApi::unifiedOrder($config, $input);
+            $jsApiParameters = $this->getJsApiParameters($unifiedOrder);
+
+            $order = new Order();
+            $order->user_id = $userId;
+            $order->product_id = $productId;
+            $order->order_id = $orderId;
+            $order->pre_param = $jsApiParameters;
+            $order->save();
         }
-        $orderId = md5(Str::orderedUuid());
-        //②、统一下单
-        $input = new \WxPayUnifiedOrder();
-        $input->SetBody("校友说分享");
-        $input->SetAttach($productMod->title);
-        $input->SetDetail($productMod->desc);
-        $input->SetOut_trade_no($orderId);
-        $input->SetTotal_fee($productMod->price);
-        $input->SetTime_start(date("YmdHis"));
-        $input->SetTime_expire(date("YmdHis", time() + 600));
-        // $input->SetGoods_tag("测试商品");
-        $input->SetNotify_url("http://talktoalumni.com/api/orderNotify");
-        $input->SetTrade_type("JSAPI");
-        $input->SetOpenid($openId);
-
-        $config = new PayConfig();
-        $unifiedOrder = \WxPayApi::unifiedOrder($config, $input);
-        $jsApiParameters = $this->getJsApiParameters($unifiedOrder);
-
-        $order = new Order();
-        $order->user_id = $userId;
-        $order->product_id = $productId;
-        $order->order_id = $orderId;
-        $order->pre_param = $jsApiParameters;
-        $order->save();
 
         $jsonParam = json_decode($jsApiParameters, true);
         return [
