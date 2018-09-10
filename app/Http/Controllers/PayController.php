@@ -145,6 +145,7 @@ class PayController extends Controller
         $mobile = $request->input('mobile');
         $code = $request->input('code');
         $weixin = $request->input('weixin');
+        $product = $request->input('product');
 
         $userInfo = $request->user();
 
@@ -154,6 +155,26 @@ class PayController extends Controller
         if (!$code) {
             throw new Exception('没有填写验证码');
         }
+        if (!$product) {
+            throw new Exception('没有商品信息');
+        }
+
+        $productMod = Product::where('id', $product)->orWhere('name', $product)->first();
+        if (!$productMod) {
+            throw new Exception('没有指定的产品');
+        }
+        $productId = $productMod->id;
+
+        $order = Order::where('user_id', $userInfo->userId)
+            ->where('product_id', $productId)
+            ->where('is_pay', 1)
+            ->first();
+
+        if (!$order) {
+            throw new Exception('当前用户没有已支付的订单');
+        }
+        $order->status = 1;
+        $order->save();
 
         SmsController::validateSmsCode($code, $mobile);
 
