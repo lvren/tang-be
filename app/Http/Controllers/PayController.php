@@ -19,6 +19,23 @@ class PayController extends Controller
         $this->middleware('auth');
     }
 
+    public function payOrder(Request $request)
+    {
+        $userInfo = $request->user();
+        $orderId = $request->input('order');
+
+        $order = Order::where('user_id', $userInfo->userId)
+            ->where('order_id', $orderId)
+            ->where('is_pay', 0)
+            ->first();
+        if ($order) {
+            $order->is_pay = 1;
+            $order->save();
+            return ['status' => true, 'message' => '删除无效订单成功'];
+        }
+        return ['stauts' => false, 'message' => '修改订单状态失败'];
+    }
+
     public function closeOrder(Request $request)
     {
         $userInfo = $request->user();
