@@ -15,6 +15,7 @@ $router->get('/api/sendCode', 'SmsController@sendSmsCode');
 
 $router->get('/api/orderNotify', 'OrderController@orderNotify');
 $router->get('/api/checkOrder', 'OrderController@checkOrder');
+$router->get('/api/closeOrder', 'PayController@closeOrder');
 
 $router->get('/api/login', 'AuthController@userLogin');
 $router->get('/api/callback', 'AuthController@getUserAccessToken');
