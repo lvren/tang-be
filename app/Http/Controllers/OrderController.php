@@ -44,10 +44,11 @@ class OrderController extends Controller
             }
         }
 
-        return response()->xml([
-            'return_code' => $responseCode,
-            'return_msg' => 'OK',
-        ]);
+        echo "<xml>
+              <return_code><![CDATA[{$responseCode}]]></return_code>
+              <return_msg><![CDATA[OK]]></return_msg>
+          </xml>";
+        exit();
     }
 
     public function checkOrder(Request $request)

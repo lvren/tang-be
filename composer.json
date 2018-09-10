@@ -1,7 +1,11 @@
 {
     "name": "laravel/lumen",
     "description": "The Laravel Lumen Framework.",
-    "keywords": ["framework", "laravel", "lumen"],
+    "keywords": [
+        "framework",
+        "laravel",
+        "lumen"
+    ],
     "license": "MIT",
     "type": "project",
     "require": {
@@ -14,7 +18,6 @@
         "ramsey/uuid": "^3.8",
         "moontoast/math": "^1.1",
         "qcloudsms/qcloudsms_php": "^0.1.3",
-        "jailtonsc/laravel-response-xml": "^3.0",
         "soapbox/laravel-formatter": "^3.1"
     },
     "require-dev": {

@@ -23,9 +23,7 @@ $app = new Laravel\Lumen\Application(
     realpath(__DIR__ . '/../')
 );
 
-$app->withFacades(true, [
-    'XmlResponse\Facades\XmlFacade::class' => 'Xml',
-]);
+$app->withFacades(true);
 
 $app->withEloquent();
 
@@ -82,7 +80,6 @@ $app->routeMiddleware([
 
 // $app->register(App\Providers\AppServiceProvider::class);
 $app->register(App\Providers\AuthServiceProvider::class);
-$app->register(XmlResponse\XmlResponseServiceProvider::class);
 // $app->register(App\Providers\EventServiceProvider::class);
 // $app->register(Illuminate\Redis\RedisServiceProvider::class);
 
