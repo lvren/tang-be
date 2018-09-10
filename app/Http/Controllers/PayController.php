@@ -19,7 +19,7 @@ class PayController extends Controller
         $this->middleware('auth');
     }
 
-    public function closeOrder()
+    public function closeOrder(Request $request)
     {
         $userInfo = $request->user();
         $orderId = $request->input('order');
