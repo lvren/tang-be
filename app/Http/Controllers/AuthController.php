@@ -30,7 +30,7 @@ class AuthController extends Controller
             if ($order) {
                 $orderParam['id'] = $order->id;
                 $orderParam['status'] = $order->status;
-                $orderParam['isPay'] = $order->isPay;
+                $orderParam['isPay'] = $order->is_pay;
             }
             return ['status' => true, 'order' => $orderParam, 'message' => '存在用户登录信息'];
         }
