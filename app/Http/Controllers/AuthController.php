@@ -17,21 +17,21 @@ class AuthController extends Controller
     public function isLogin(Request $request)
     {
         $user = $request->user();
-        $product = $request->input('product');
-        $productMod = Product::where('id', $product)->orWhere('name', $product)->first();
-        if (!$productMod) {
-            throw new Exception('没有指定的产品');
-        }
-        $order = Order::where('user_id', $user->userId)
-            ->where('product_id', $productMod->id)
-            ->first();
-        $orderParam = ['id' => null, 'status' => 0];
-        if ($order) {
-            $orderParam['id'] = $order->id;
-            $orderParam['status'] = $order->status;
-            $orderParam['isPay'] = $order->isPay;
-        }
         if ($user) {
+            $product = $request->input('product');
+            $productMod = Product::where('id', $product)->orWhere('name', $product)->first();
+            if (!$productMod) {
+                throw new Exception('没有指定的产品');
+            }
+            $order = Order::where('user_id', $user->userId)
+                ->where('product_id', $productMod->id)
+                ->first();
+            $orderParam = ['id' => null, 'status' => 0];
+            if ($order) {
+                $orderParam['id'] = $order->id;
+                $orderParam['status'] = $order->status;
+                $orderParam['isPay'] = $order->isPay;
+            }
             return ['status' => true, 'order' => $orderParam, 'message' => '存在用户登录信息'];
         }
         return response('用户未登录', 401)->header('Content-Type', 'text/plain');
