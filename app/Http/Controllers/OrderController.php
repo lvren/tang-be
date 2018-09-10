@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Model\Order;
 use Illuminate\Http\Request;
 use Log;
+use SoapBox\Formatter\Formatter;
 
 class OrderController extends Controller
 {
