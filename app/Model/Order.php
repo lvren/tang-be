@@ -10,6 +10,7 @@ class Order extends Model
 
     protected $table = 'order';
 
+    protected $dates = ['deleted_at', 'created_at', 'updated_at'];
     // 分享者的信息
     public function user()
     {
