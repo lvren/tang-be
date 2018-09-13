@@ -6,6 +6,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class Product extends Model
 {
+    use SoftDeletes;
+
     protected $table = 'product';
     // 分享者的信息
     public function share()

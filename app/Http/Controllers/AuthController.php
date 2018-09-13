@@ -98,6 +98,7 @@ class AuthController extends Controller
             $user->save();
         }
         $constentJson['userId'] = $user->id;
+        // $jsConfig = $this->getJsConfig($constentJson['access_token']);
 
         $cookieUuid = Str::orderedUuid();
         Cache::put($cookieUuid, json_encode($constentJson), $constentJson['expires_in']);
@@ -107,5 +108,26 @@ class AuthController extends Controller
         }
         return response(['message' => '登录成功', 'status' => true])
             ->cookie($cookie);
+    }
+
+    private function getJsConfig($accessToken)
+    {
+        $client = new Client([
+            'base_uri' => 'https://api.weixin.qq.com',
+        ]);
+        $response = $client->request(
+            'GET',
+            '/cgi-bin/ticket/getticket',
+            [
+                'query' => [
+                    'access_token' => $accessToken,
+                    'type' => 'jsapi',
+                ],
+            ]
+        );
+
+        $body = $response->getBody();
+        $constentJson = json_decode((string) $body);
+        $jsTickt = $constentJson->ticket;
     }
 }
