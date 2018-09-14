@@ -74,7 +74,20 @@ class AuthController extends Controller
             ]
         );
 
+        $clientResponse = $client->request(
+            'GET',
+            '/cgi-bin/token',
+            [
+                'query' => [
+                    'appid' => env('WEIXIN_ID'),
+                    'secret' => env('WEIXIN_SECRET'),
+                    'grant_type' => 'client_credential',
+                ],
+            ]
+        );
+
         $body = $response->getBody();
+        $clientAccess = json_decode((string) $clientResponse->getBody());
         $constentJson = json_decode((string) $body, true);
         // {
         //     "access_token":"ACCESS_TOKEN",
@@ -98,7 +111,7 @@ class AuthController extends Controller
             $user->save();
         }
         $constentJson['userId'] = $user->id;
-        // $jsConfig = $this->getJsConfig($constentJson['access_token']);
+        $constentJson['clientAccess'] = $clientAccess->access_token ? $clientAccess->access_token : false;
 
         $cookieUuid = Str::orderedUuid();
         Cache::put($cookieUuid, json_encode($constentJson), $constentJson['expires_in']);

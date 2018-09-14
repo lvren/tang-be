@@ -7,6 +7,7 @@ use App\Http\Controllers\PayConfig;
 use App\Model\Order;
 use App\Model\Product;
 use App\Model\User;
+use GuzzleHttp\Client;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
@@ -17,6 +18,68 @@ class PayController extends Controller
     public function __construct()
     {
         $this->middleware('auth');
+    }
+
+    public function getJsConfig(Request $request)
+    {
+        $userInfo = $request->user();
+        $href = $request->input('href');
+        $accessToken = $userInfo->clientAccess;
+        $client = new Client([
+            'base_uri' => 'https://api.weixin.qq.com',
+        ]);
+        $response = $client->request(
+            'GET',
+            '/cgi-bin/ticket/getticket',
+            [
+                'query' => [
+                    'access_token' => $accessToken,
+                    'type' => 'jsapi',
+                ],
+            ]
+        );
+
+        $body = $response->getBody();
+        $constentJson = json_decode((string) $body);
+        if ($constentJson->errcode !== 0) {
+            throw Exception($constentJson->errmsg);
+        }
+        $jsTickt = $constentJson->ticket;
+        $noncestr = $this->getNonceStr();
+        $timestamp = $this->getMillisecond();
+        $signStr = "jsapi_ticket={$jsTickt}&noncestr={$noncestr}&timestamp={$timestamp}&url={$href}";
+        return [
+            "status" => true,
+            "data" => [
+                "signature" => sha1($signStr),
+                "nonceStr" => $noncestr,
+                "timestamp" => $timestamp,
+                "appId" => env('WEIXIN_ID'),
+            ],
+        ];
+    }
+
+    /**
+     * 获取毫秒级别的时间戳
+     */
+    private function getMillisecond()
+    {
+        //获取毫秒的时间戳
+        $time = explode(" ", microtime());
+        $time = $time[1] . ($time[0] * 1000);
+        $time2 = explode(".", $time);
+        $time = $time2[0];
+        return $time;
+    }
+
+    private function getNonceStr($length = 32)
+    {
+        $chars = "abcdefghijklmnopqrstuvwxyz0123456789";
+        $str = "";
+        for ($i = 0; $i < $length; $i++) {
+            $str .= substr($chars, mt_rand(0, strlen($chars) - 1), 1);
+        }
+        return $str;
     }
 
     public function payOrder(Request $request)
