@@ -42,7 +42,7 @@ class PayController extends Controller
         $body = $response->getBody();
         $constentJson = json_decode((string) $body);
         if ($constentJson->errcode !== 0) {
-            throw Exception($constentJson->errmsg);
+            throw new Exception($constentJson->errmsg);
         }
         $jsTickt = $constentJson->ticket;
         $noncestr = $this->getNonceStr();
