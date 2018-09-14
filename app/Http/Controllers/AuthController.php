@@ -114,8 +114,8 @@ class AuthController extends Controller
         $constentJson['clientAccess'] = $clientAccess->access_token ? $clientAccess->access_token : false;
 
         $cookieUuid = Str::orderedUuid();
-        Cache::put($cookieUuid, json_encode($constentJson), $constentJson['expires_in']);
-        $cookie = new Cookie('talksession', $cookieUuid, time() + $constentJson['expires_in']);
+        Cache::put($cookieUuid, json_encode($constentJson), (int) $constentJson['expires_in']);
+        $cookie = new Cookie('talksession', $cookieUuid, time() + (int) $constentJson['expires_in']);
         if ($state) {
             return redirect($state)->cookie($cookie);
         }
