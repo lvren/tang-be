@@ -111,7 +111,7 @@ class AuthController extends Controller
             $user->save();
         }
         $constentJson['userId'] = $user->id;
-        $constentJson['clientAccess'] = $clientAccess && $clientAccess->errcode === 0 ? $clientAccess->access_token : false;
+        $constentJson['clientAccess'] = isset($clientAccess->access_token) ? $clientAccess->access_token : false;
 
         $cookieUuid = Str::orderedUuid();
         Cache::put($cookieUuid, json_encode($constentJson), (int) $constentJson['expires_in']);
