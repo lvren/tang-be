@@ -130,6 +130,7 @@ class PayController extends Controller
         $openId = $userInfo->openid;
         $userId = $userInfo->userId;
 
+        $userAr = User::where('id', $userId)->first();
         $order = Order::where('user_id', $userId)
             ->where('product_id', $productMod->id)
             ->first();
@@ -158,11 +159,13 @@ class PayController extends Controller
             $unifiedOrder = \WxPayApi::unifiedOrder($config, $input);
             $jsApiParameters = $this->getJsApiParameters($unifiedOrder);
 
+            $orderStatus = $userAr->weixin && $userAr->weixin !== '' ? 1 : 0;
             $order = new Order();
             $order->user_id = $userId;
             $order->product_id = $productId;
             $order->order_id = $orderId;
             $order->pre_param = $jsApiParameters;
+            $order->status = $orderStatus;
             $order->save();
         }
         ReportController::saveViewReport($userId, 'payOrder');
