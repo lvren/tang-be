@@ -165,7 +165,7 @@ class PayController extends Controller
             $order->pre_param = $jsApiParameters;
             $order->save();
         }
-
+        ReportController::saveViewReport($userId, 'payOrder');
         $jsonParam = json_decode($jsApiParameters, true);
         return [
             'status' => true,
@@ -222,6 +222,9 @@ class PayController extends Controller
             throw new Exception('没有商品信息');
         }
 
+        SmsController::validateSmsCode($code, $mobile);
+        ReportController::saveViewReport($userId, 'saveInfo');
+
         $productMod = Product::where('id', $product)->orWhere('name', $product)->first();
         if (!$productMod) {
             throw new Exception('没有指定的产品');
@@ -238,8 +241,6 @@ class PayController extends Controller
         }
         $order->status = 1;
         $order->save();
-
-        SmsController::validateSmsCode($code, $mobile);
 
         $user = User::where('id', $userInfo->userId)->first();
         if (!$user) {

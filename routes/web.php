@@ -26,3 +26,5 @@ $router->get('/api/isLogin', 'AuthController@isLogin');
 $router->get('/api/getPayParam', 'PayController@getPayParam');
 $router->post('/api/saveInfo', 'PayController@saveOrder');
 $router->get('/api/saveInfo', 'PayController@saveOrder');
+
+$router->get('/api/reportVisit', 'ReportController@reportView');
