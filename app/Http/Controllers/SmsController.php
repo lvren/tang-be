@@ -33,7 +33,7 @@ class SmsController extends Controller
             if (!$rsp || $rsp->result !== 0) {
                 throw new Exception($rsp && $rsp->errmsg ? $rsp->errmsg : '短信发送失败');
             }
-            Cache::put($mobile, $randomCode, 60);
+            Cache::put($mobile, $randomCode, 1);
         }
         return ['status' => true, 'message' => '验证码已发送，1分钟内验证码有效，请不要轻易告诉他人'];
     }
