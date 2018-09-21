@@ -214,7 +214,7 @@ class PayController extends Controller
         $product = $request->input('product');
 
         $userInfo = $request->user();
-
+        $userId = $userInfo->userId;
         if (!$mobile) {
             throw new Exception('没有指定手机号码');
         }
