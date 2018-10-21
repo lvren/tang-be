@@ -14,6 +14,13 @@ use Symfony\Component\HttpFoundation\Cookie;
 
 class AuthController extends Controller
 {
+    public function getAdvanceUser()
+    {
+        $payUser = Order::select('user_id')->where('product_id', 3)->where('is_pay', 1)->get();
+        $userInfo = User::whereIn('id', $payUser)->get();
+        return $userInfo;
+    }
+
     public function isLogin(Request $request)
     {
         $user = $request->user();

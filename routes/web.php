@@ -28,3 +28,6 @@ $router->post('/api/saveInfo', 'PayController@saveOrder');
 $router->get('/api/saveInfo', 'PayController@saveOrder');
 
 $router->get('/api/reportVisit', 'ReportController@reportView');
+
+// 临时接口
+$router->get('/api/getAdvanceUser', 'AuthController@getAdvanceUser');
