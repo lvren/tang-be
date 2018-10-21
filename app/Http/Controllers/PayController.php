@@ -118,6 +118,7 @@ class PayController extends Controller
     {
         $userInfo = $request->user();
         $product = $request->input('product');
+        $number = $request->input('number', 1);
         if (!$product) {
             throw new Exception('没有指定购买的产品');
         }
@@ -147,7 +148,7 @@ class PayController extends Controller
             $input->SetAttach($productMod->title);
             $input->SetDetail($productMod->desc);
             $input->SetOut_trade_no($orderId);
-            $input->SetTotal_fee($productMod->price);
+            $input->SetTotal_fee($productMod->price * $number);
             $input->SetTime_start(date("YmdHis"));
             $input->SetTime_expire(date("YmdHis", time() + 600));
             // $input->SetGoods_tag("测试商品");
