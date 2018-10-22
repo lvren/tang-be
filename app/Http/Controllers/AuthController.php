@@ -18,7 +18,15 @@ class AuthController extends Controller
     {
         $payUser = Order::select('user_id')->where('product_id', 3)->where('is_pay', 1)->get();
         $userInfo = User::whereIn('id', $payUser)->get();
-        return $userInfo;
+        $data = [];
+        foreach ($userInfo as $key => $value) {
+            array_push($data, [
+                '微信号' => $value->weixin,
+                '手机号' => $value->mobile,
+                '创建时间' => $value->updated_at,
+            ]);
+        }
+        return $data;
     }
 
     public function isLogin(Request $request)
