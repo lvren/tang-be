@@ -13,6 +13,9 @@ use Illuminate\Support\Str;
 
 require_once dirname(__FILE__) . "/../Lib/WxPay/WxPay.Api.php";
 
+/**
+ * PayController 订单(需要用户登录部分) / 支付相关操作
+ */
 class PayController extends Controller
 {
     public function __construct()
@@ -207,6 +210,12 @@ class PayController extends Controller
         return $parameters;
     }
 
+    /**
+     * saveOrder
+     * 保存用户给订单信息
+     * @param Request $request
+     * @return void
+     */
     public function saveOrder(Request $request)
     {
         $mobile = $request->input('mobile');
@@ -256,5 +265,21 @@ class PayController extends Controller
         $user->save();
 
         return ['status' => true, 'message' => '验证成功'];
+    }
+
+    /**
+     * getUserOrder
+     * 获取当前用户的所有订单信息
+     * @param Request $request
+     * @return void
+     */
+    public function getUserOrder(Request $request)
+    {
+        $userInfo = $request->user();
+        $userId = $userInfo->userId;
+
+        $orderList = Order::where('user_id', $userInfo->userId)->get();
+
+        return ['status' => true, 'message' => 'success', 'data' => $orderList];
     }
 }

@@ -7,6 +7,9 @@ use Cache;
 use Illuminate\Http\Request;
 use Qcloud\Sms\SmsSingleSender;
 
+/**
+ * SmsController 短信相关处理类
+ */
 class SmsController extends Controller
 {
     public function __construct()
