@@ -61,7 +61,7 @@ class AuthController extends Controller
         $api .= "appid={$appid}&";
         $api .= "redirect_uri={$redirect}&";
         $api .= "response_type=code&";
-        $api .= "scope=snsapi_base&state={$redirectUrl}#wechat_redirect";
+        $api .= "scope=snsapi_userinfo&state={$redirectUrl}#wechat_redirect";
 
         return redirect($api);
     }
