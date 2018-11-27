@@ -10,6 +10,7 @@ use Cache;
 use GuzzleHttp\Client;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
+use Log;
 use Symfony\Component\HttpFoundation\Cookie;
 
 class AuthController extends Controller
@@ -76,7 +77,7 @@ class AuthController extends Controller
         $client = new Client([
             'base_uri' => 'https://api.weixin.qq.com',
         ]);
-        $response = $client->request(
+        $accessResp = $client->request(
             'GET',
             '/sns/oauth2/access_token',
             [
@@ -89,7 +90,7 @@ class AuthController extends Controller
             ]
         );
 
-        $clientResponse = $client->request(
+        $clientResp = $client->request(
             'GET',
             '/cgi-bin/token',
             [
@@ -101,17 +102,9 @@ class AuthController extends Controller
             ]
         );
 
-        $body = $response->getBody();
-        $clientAccess = json_decode((string) $clientResponse->getBody());
-        $constentJson = json_decode((string) $body, true);
-        // {
-        //     "access_token":"ACCESS_TOKEN",
-        //     "expires_in":7200,
-        //     "refresh_token":"REFRESH_TOKEN",
-        //     "openid":"OPENID",
-        //     "scope":"SCOPE"
-        // }
-        // {"errcode":40029,"errmsg":"invalid code"}
+        $clientAccess = json_decode((string) $clientResp->getBody());
+        $constentJson = json_decode((string) $accessResp->getBody(), true);
+
         if (!isset($constentJson['access_token'])) {
             $errorMessage = '获取用户access_token失败';
             if (isset($constentJson['errcode'])) {
@@ -119,14 +112,34 @@ class AuthController extends Controller
             }
             throw new Exception($errorMessage);
         }
+        $constentJson['clientAccess'] = isset($clientAccess->access_token) ? $clientAccess->access_token : false;
+        // 拉取用户详情信息
+        $userInfoResponse = $client->request(
+            'GET',
+            'sns/userinfo',
+            [
+                'query' => [
+                    'lang' => 'zh_CN',
+                    'openid' => $constentJson['openid'],
+                    'access_token' => $constentJson['access_token'],
+                ],
+            ]
+        );
+
+        $userInfo = json_decode((string) $userInfoResponse->getBody(), true);
         $user = User::where('uuid', $constentJson['openid'])->first();
+        Log::info($userInfo);
         if (!$user) {
             $user = new User();
             $user->uuid = $constentJson['openid'];
+            $user->unionid = $userInfo['unionid'];
+            $user->nickname = $userInfo['nickname'];
+            $user->save();
+        } else {
+            $user->unionid = $userInfo['unionid'];
+            $user->nickname = $userInfo['nickname'];
             $user->save();
         }
-        $constentJson['userId'] = $user->id;
-        $constentJson['clientAccess'] = isset($clientAccess->access_token) ? $clientAccess->access_token : false;
 
         $cookieUuid = Str::orderedUuid();
         Cache::put($cookieUuid, json_encode($constentJson), (int) $constentJson['expires_in']);
@@ -157,5 +170,38 @@ class AuthController extends Controller
         $body = $response->getBody();
         $constentJson = json_decode((string) $body);
         $jsTickt = $constentJson->ticket;
+    }
+
+    public function mAppCode2Session(Request $request)
+    {
+        $code = $request->input('code');
+
+        $client = new Client([
+            'base_uri' => 'https://api.weixin.qq.com',
+        ]);
+        $response = $client->request(
+            'GET',
+            '/sns/jscode2session',
+            [
+                'query' => [
+                    'appid' => env('MAPP_ID'),
+                    'secret' => env('MAPP_SECRET'),
+                    'js_code' => $code,
+                    'grant_type' => 'authorization_code',
+                ],
+            ]
+        );
+
+        $resJson = json_decode((string) $response->getBody(), true);
+        if (isset($resJson['errcode']) && $resJson['errcode'] !== 0) {
+            throw new Exception('错误码' . $resJson['errcode'] . ';错误信息' . $resJson['errmsg']);
+        }
+
+        $cookieUuid = Str::orderedUuid();
+        Cache::put($cookieUuid, json_encode($resJson));
+        $cookie = new Cookie('talksession', $cookieUuid);
+
+        return response(['status' => true, 'message' => 'success', 'data' => $resJson])
+            ->cookie($cookie);
     }
 }

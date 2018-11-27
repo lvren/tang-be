@@ -31,3 +31,5 @@ $router->get('/api/reportVisit', 'ReportController@reportView');
 
 // 临时接口
 $router->get('/api/getAdvanceUser', 'AuthController@getAdvanceUser');
+
+$router->get('/mapi/openid', 'AuthController@mAppCode2Session');
