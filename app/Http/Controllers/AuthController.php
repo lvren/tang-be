@@ -171,37 +171,4 @@ class AuthController extends Controller
         $constentJson = json_decode((string) $body);
         $jsTickt = $constentJson->ticket;
     }
-
-    public function mAppCode2Session(Request $request)
-    {
-        $code = $request->input('code');
-
-        $client = new Client([
-            'base_uri' => 'https://api.weixin.qq.com',
-        ]);
-        $response = $client->request(
-            'GET',
-            '/sns/jscode2session',
-            [
-                'query' => [
-                    'appid' => env('MAPP_ID'),
-                    'secret' => env('MAPP_SECRET'),
-                    'js_code' => $code,
-                    'grant_type' => 'authorization_code',
-                ],
-            ]
-        );
-
-        $resJson = json_decode((string) $response->getBody(), true);
-        if (isset($resJson['errcode']) && $resJson['errcode'] !== 0) {
-            throw new Exception('错误码' . $resJson['errcode'] . ';错误信息' . $resJson['errmsg']);
-        }
-
-        $cookieUuid = Str::orderedUuid();
-        Cache::put($cookieUuid, json_encode($resJson));
-        $cookie = new Cookie('talksession', $cookieUuid);
-
-        return response(['status' => true, 'message' => 'success', 'data' => $resJson])
-            ->cookie($cookie);
-    }
 }

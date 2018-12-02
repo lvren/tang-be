@@ -11,11 +11,6 @@ use Illuminate\Http\Request;
  */
 class SharerController extends Controller
 {
-    public function __construct()
-    {
-        $this->middleware('auth');
-    }
-
     public function getSharerList(Request $request)
     {
         $sharerList = Sharer::get();
