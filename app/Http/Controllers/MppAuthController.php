@@ -4,8 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Exceptions\ErrorMsgException as Exception;
 use App\Http\Controllers\PayConfig;
+use App\Model\Country;
 use App\Model\Order;
 use App\Model\Product;
+use App\Model\Sharer;
 use App\Model\User;
 use Cache;
 use GuzzleHttp\Client;
@@ -63,7 +65,7 @@ class MppAuthController extends Controller
             'data' => ['sessionKey' => $sessionKey, 'hasLogin' => $hasLogin],
         ];
     }
-
+    // 保存用户信息回调
     public function mAppSaveUserInfo(Request $request)
     {
         $userInfo = $request->input('userInfo');
@@ -100,7 +102,7 @@ class MppAuthController extends Controller
 
         return ['stauts' => true, 'data' => $user];
     }
-
+    // 获取支付配置接口
     public function getPayParam(Request $request)
     {
         $sessionKey = $request->input('sessionKey');
@@ -174,7 +176,6 @@ class MppAuthController extends Controller
             'order' => ['id' => $order->id, 'orderId' => $order->order_id],
         ];
     }
-
     /**
      *
      * 获取jsapi支付的参数
@@ -202,5 +203,17 @@ class MppAuthController extends Controller
         $jsapi->SetPaySign($jsapi->MakeSign($config));
         $parameters = json_encode($jsapi->GetValues());
         return $parameters;
+    }
+
+    public function getCountryList(Request $request)
+    {
+        $country = Country::all();
+        return ['status' => true, 'data' => $country];
+    }
+
+    public function getSharerList(Request $request)
+    {
+        $sharer = Sharer::with('school')->get();
+        return ['status' => true, 'data' => $sharer];
     }
 }

@@ -5,23 +5,20 @@ namespace App\Model;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class Order extends Model
+class School extends Model
 {
     use SoftDeletes;
-
-    protected $table = 'order';
-
     protected $dates = ['deleted_at', 'created_at', 'updated_at'];
     protected $hidden = ['deleted_at'];
-    // 分享者的信息
-    public function user()
+    protected $table = 'school';
+    // 当前分享的分享产品
+    public function country()
     {
-        return $this->hasOne('App\Model\User');
+        return $this->hasOne('App\Model\Country');
     }
 
-    // 分享者的信息
-    public function product()
+    public function sharer()
     {
-        return $this->hasOne('App\Model\Product');
+        return $this->hasMany('App\Model\Sharer');
     }
 }
