@@ -141,13 +141,14 @@ class MppAuthController extends Controller
             $jsApiParameters = $order->pre_param;
         } else {
             $orderId = md5(Str::orderedUuid());
+            $price = $productMod->price * $number;
             //②、统一下单
             $input = new \WxPayUnifiedOrder();
             $input->SetBody("校友说分享");
             $input->SetAttach($productMod->title);
             $input->SetDetail($productMod->desc);
             $input->SetOut_trade_no($orderId);
-            $input->SetTotal_fee($productMod->price * $number);
+            $input->SetTotal_fee($price);
             $input->SetTime_start(date("YmdHis"));
             $input->SetTime_expire(date("YmdHis", time() + 600));
             // $input->SetGoods_tag("测试商品");
@@ -165,7 +166,7 @@ class MppAuthController extends Controller
             $order->product_id = $productId;
             $order->order_id = $orderId;
             $order->pre_param = $jsApiParameters;
-            $order->status = $orderStatus;
+            $order->price = $price;
             $order->save();
         }
 
@@ -174,10 +175,10 @@ class MppAuthController extends Controller
             'status' => true,
             'param' => $jsonParam,
             'order' => ['id' => $order->id, 'orderId' => $order->order_id],
+            'user' => ['infoStatus' => $orderStatus],
         ];
     }
     /**
-     *
      * 获取jsapi支付的参数
      * @param array $UnifiedOrderResult 统一支付接口返回的数据
      * @throws WxPayException
@@ -204,16 +205,114 @@ class MppAuthController extends Controller
         $parameters = json_encode($jsapi->GetValues());
         return $parameters;
     }
-
+    // 获取所有国家列表
     public function getCountryList(Request $request)
     {
         $country = Country::all();
         return ['status' => true, 'data' => $country];
     }
-
+    // 获取所有校友列表
     public function getSharerList(Request $request)
     {
         $sharer = Sharer::with('school')->get();
         return ['status' => true, 'data' => $sharer];
+    }
+    // 获取校友的详细信息
+    public function getSharerInfo(Request $request)
+    {
+        $sessionKey = $request->input('sessionKey');
+        $sharerId = $request->input('sharerId');
+        // 拿到自己生成的sessionKey，获取登录信息
+        $sessionInfo = Cache::get($sessionKey);
+        if (!$sessionInfo) {
+            throw new Exception('用户登录信息失效');
+        }
+        if (!$sharerId) {
+            throw new Exception('没有接受到校友信息参数ID');
+        }
+        $sharer = Sharer::with('school')->where('id', $sharerId)->first();
+        if (!$sharer) {
+            throw new Exception('没有接受到校友' . $sharerId . '的信息');
+        }
+        return ['status' => true, 'data' => $sharer];
+    }
+    // 获取用户的所有订单
+    public function getUserProductList(Request $request)
+    {
+        $sessionKey = $request->input('sessionKey');
+        // 拿到自己生成的sessionKey，获取登录信息
+        $sessionInfo = Cache::get($sessionKey);
+        if (!$sessionInfo) {
+            throw new Exception('用户登录信息失效');
+        }
+        $sessionInfo = json_decode($sessionInfo, true);
+        // 用登录信息换取用户信息
+        $openId = $sessionInfo['openid'];
+        $user = User::where('uuid', $openId)->first();
+        if (!$user) {
+            throw new Exception('获取用户信息失败');
+        }
+
+        $orderList = Order::with(['product', 'user'])->select(['order_id', 'is_pay', 'user_id', 'product_id', 'price', 'created_at'])->where('user_id', $user->id)->get();
+        return ['status' => true, 'data' => $orderList];
+    }
+
+    public function getUserInfo(Request $request)
+    {
+        $sessionKey = $request->input('sessionKey');
+        // 拿到自己生成的sessionKey，获取登录信息
+        $sessionInfo = Cache::get($sessionKey);
+        if (!$sessionInfo) {
+            throw new Exception('用户登录信息失效');
+        }
+        $sessionInfo = json_decode($sessionInfo, true);
+        // 用登录信息换取用户信息
+        $openId = $sessionInfo['openid'];
+        $user = User::where('uuid', $openId)->first();
+        if (!$user) {
+            throw new Exception('获取用户信息失败');
+        }
+
+        return ['status' => true, 'data' => $user];
+    }
+
+    // 完善用户信息
+    public function saveUserInfo(Request $request)
+    {
+        $sessionKey = $request->input('sessionKey');
+        // 拿到自己生成的sessionKey，获取登录信息
+        $sessionInfo = Cache::get($sessionKey);
+        if (!$sessionInfo) {
+            throw new Exception('用户登录信息失效');
+        }
+        $sessionInfo = json_decode($sessionInfo, true);
+        // 用登录信息换取用户信息
+        $openId = $sessionInfo['openid'];
+        $user = User::where('uuid', $openId)->first();
+        if (!$user) {
+            throw new Exception('获取用户信息失败');
+        }
+
+        $mobile = $request->input('mobile');
+        $code = $request->input('code');
+        $weixin = $request->input('weixin');
+
+        if (!$mobile) {
+            throw new Exception('没有指定手机号码');
+        }
+        if (!$code) {
+            throw new Exception('没有填写验证码');
+        }
+        if (!$weixin) {
+            throw new Exception('没有填写验证码');
+        }
+
+        SmsController::validateSmsCode($code, $mobile);
+
+        $user->mobile = $mobile;
+        $user->weixin = $weixin;
+        $user->save();
+
+        return ['status' => true, 'message' => '验证成功'];
     }
 }
