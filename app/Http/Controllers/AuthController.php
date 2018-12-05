@@ -34,6 +34,7 @@ class AuthController extends Controller
     {
         $user = $request->user();
         if ($user) {
+            Log::info(json_encode($user));
             $product = $request->input('product');
             $productMod = Product::where('id', $product)->orWhere('name', $product)->first();
             if (!$productMod) {
@@ -134,13 +135,16 @@ class AuthController extends Controller
             $user->uuid = $constentJson['openid'];
             $user->unionid = $userInfo['unionid'];
             $user->nickname = $userInfo['nickname'];
+            $user->avatarUrl = $userInfo['headimgurl'];
             $user->save();
         } else {
             $user->unionid = $userInfo['unionid'];
             $user->nickname = $userInfo['nickname'];
+            $user->avatarUrl = $userInfo['headimgurl'];
             $user->save();
         }
 
+        $constentJson['userId'] = $user->id;
         $cookieUuid = Str::orderedUuid();
         Cache::put($cookieUuid, json_encode($constentJson), (int) $constentJson['expires_in']);
         $cookie = new Cookie('talksession', $cookieUuid, time() + (int) $constentJson['expires_in']);
