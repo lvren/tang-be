@@ -29,7 +29,7 @@ class PayConfig extends \WxPayConfigInterface
 
     public function GetMerchantId()
     {
-        return env('PAY_ID');
+        return env('MAPP_MCH');
     }
 
     //=======【支付相关配置：支付成功回调地址/签名方式】===================================

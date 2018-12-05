@@ -35,5 +35,6 @@ $router->get('/api/getAdvanceUser', 'AuthController@getAdvanceUser');
 $router->get('/mapi/openid', 'MppAuthController@mAppCode2Session');
 $router->post('/mapi/saveUserInfo', 'MppAuthController@mAppSaveUserInfo');
 $router->post('/mapi/payment', 'MppAuthController@getPayParam');
+$router->get('/mapi/orderCallback', 'MppAuthController@orderCallback');
 $router->get('/mapi/country', 'MppAuthController@getCountryList');
 $router->get('/mapi/sharer', 'MppAuthController@getSharerList');

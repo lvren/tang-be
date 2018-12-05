@@ -130,6 +130,7 @@ class MppAuthController extends Controller
         }
         $productId = $productMod->id;
         $userId = $user->id;
+        $orderStatus = $user->weixin && $user->weixin !== '' ? 1 : 0;
 
         $order = Order::where('user_id', $userId)
             ->where('product_id', $productMod->id)
@@ -142,6 +143,7 @@ class MppAuthController extends Controller
         } else {
             $orderId = md5(Str::orderedUuid());
             $price = $productMod->price * $number;
+            Log:
             //②、统一下单
             $input = new \WxPayUnifiedOrder();
             $input->SetBody("校友说分享");
@@ -160,7 +162,6 @@ class MppAuthController extends Controller
             $unifiedOrder = \WxPayApi::unifiedOrder($config, $input);
             $jsApiParameters = $this->getJsApiParameters($unifiedOrder);
 
-            $orderStatus = $user->weixin && $user->weixin !== '' ? 1 : 0;
             $order = new Order();
             $order->user_id = $userId;
             $order->product_id = $productId;
@@ -173,7 +174,7 @@ class MppAuthController extends Controller
         $jsonParam = json_decode($jsApiParameters, true);
         return [
             'status' => true,
-            'param' => $jsonParam,
+            'payargs' => $jsonParam,
             'order' => ['id' => $order->id, 'orderId' => $order->order_id],
             'user' => ['infoStatus' => $orderStatus],
         ];
@@ -204,6 +205,47 @@ class MppAuthController extends Controller
         $jsapi->SetPaySign($jsapi->MakeSign($config));
         $parameters = json_encode($jsapi->GetValues());
         return $parameters;
+    }
+
+    public function orderCallback(Request $request)
+    {
+        $orderId = $request->input('id');
+        $orderStatus = $request->input('status');
+        $transactionId = $request->input('transactionId');
+        $errorMsg = $request->input('errorMsg');
+
+        $sessionKey = $request->input('sessionKey');
+        // 拿到自己生成的sessionKey，获取登录信息
+        $sessionInfo = Cache::get($sessionKey);
+        if (!$sessionInfo) {
+            throw new Exception('用户登录信息失效');
+        }
+        // 用登录信息换取用户信息
+        $sessionInfo = json_decode($sessionInfo, true);
+        $openId = $sessionInfo['openid'];
+        $user = User::where('uuid', $openId)->first();
+        if (!$user) {
+            return ['status' => false, 'message' => '获取用户信息失败'];
+        }
+
+        $order = Order::where('user_id', $user->id)
+            ->where('id', $orderId)
+            ->first();
+        if (!$order) {
+            throw new Exception('无效的订单信息');
+        }
+
+        if ($orderStatus === 'success') {
+            $order->is_pay = 1;
+            $order->transaction_id = $transactionId;
+            $order->save();
+        } else {
+            $order->error_msg = $errorMsg;
+            $order->save();
+            $order->delete();
+        }
+
+        return ['status' => true, 'message' => '保存order信息成功'];
     }
     // 获取所有国家列表
     public function getCountryList(Request $request)
