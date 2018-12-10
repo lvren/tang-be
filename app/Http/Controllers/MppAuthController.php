@@ -48,14 +48,13 @@ class MppAuthController extends Controller
         $sessionKey = Str::orderedUuid();
         Cache::forever($sessionKey, json_encode($resJson));
 
-        $user = User::where('uuid', $resJson['openid'])->first();
+        $user = User::where('unionid', $resJson['unionid'])->first();
         $hasLogin = true;
         if (!$user) {
             $user = new User();
             $user->uuid = $resJson['openid'];
             $user->unionid = isset($resJson['unionid']) ? $resJson['unionid'] : null;
             $user->save();
-
             $hasLogin = false;
         }
 
@@ -83,11 +82,13 @@ class MppAuthController extends Controller
         $pc = new WXBizDataCrypt(env('MAPP_ID'), $sessionInfo['session_key']);
         $errCode = $pc->decryptData($encryptedData, $iv, $data);
 
+        Log::info('用户信息回调');
+        Log::info($data);
         $data = json_decode($data, true);
-
-        $user = User::where('uuid', $data['openId'])->first();
+        $user = User::where('unionid', $data['unionId'])->first();
         if ($user) {
-            $user->unionid = isset($data['unionid']) ? $data['unionid'] : null;
+            $user->uuid = $data['openId'];
+            $user->unionid = isset($data['unionId']) ? $data['unionId'] : null;
             $user->nickName = $data['nickName'];
             $user->avatarUrl = $data['avatarUrl'];
             $user->save();
@@ -115,8 +116,9 @@ class MppAuthController extends Controller
         }
         $sessionInfo = json_decode($sessionInfo, true);
         // 用登录信息换取用户信息
-        $openId = $sessionInfo['openid'];
-        $user = User::where('uuid', $openId)->first();
+        $unionid = $sessionInfo['unionid'];
+        $openid = $sessionInfo['openid'];
+        $user = User::where('unionid', $unionid)->first();
         if (!$user) {
             return ['status' => false, 'message' => '获取用户信息失败'];
         }
@@ -156,7 +158,7 @@ class MppAuthController extends Controller
             // $input->SetGoods_tag("测试商品");
             $input->SetNotify_url("http://talktoalumni.com/api/orderNotify");
             $input->SetTrade_type("JSAPI");
-            $input->SetOpenid($openId);
+            $input->SetOpenid($openid);
 
             $config = new PayConfig();
             $unifiedOrder = \WxPayApi::unifiedOrder($config, $input);
@@ -222,8 +224,8 @@ class MppAuthController extends Controller
         }
         // 用登录信息换取用户信息
         $sessionInfo = json_decode($sessionInfo, true);
-        $openId = $sessionInfo['openid'];
-        $user = User::where('uuid', $openId)->first();
+        $unionid = $sessionInfo['unionid'];
+        $user = User::where('unionid', $unionid)->first();
         if (!$user) {
             return ['status' => false, 'message' => '获取用户信息失败'];
         }
@@ -289,8 +291,8 @@ class MppAuthController extends Controller
         }
         $sessionInfo = json_decode($sessionInfo, true);
         // 用登录信息换取用户信息
-        $openId = $sessionInfo['openid'];
-        $user = User::where('uuid', $openId)->first();
+        $unionid = $sessionInfo['unionid'];
+        $user = User::where('unionid', $unionid)->first();
         if (!$user) {
             throw new Exception('获取用户信息失败');
         }
@@ -309,8 +311,8 @@ class MppAuthController extends Controller
         }
         $sessionInfo = json_decode($sessionInfo, true);
         // 用登录信息换取用户信息
-        $openId = $sessionInfo['openid'];
-        $user = User::where('uuid', $openId)->first();
+        $unionid = $sessionInfo['unionid'];
+        $user = User::where('uuid', $unionid)->first();
         if (!$user) {
             throw new Exception('获取用户信息失败');
         }
@@ -329,8 +331,8 @@ class MppAuthController extends Controller
         }
         $sessionInfo = json_decode($sessionInfo, true);
         // 用登录信息换取用户信息
-        $openId = $sessionInfo['openid'];
-        $user = User::where('uuid', $openId)->first();
+        $unionid = $sessionInfo['unionid'];
+        $user = User::where('unionid', $unionid)->first();
         if (!$user) {
             throw new Exception('获取用户信息失败');
         }
