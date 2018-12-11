@@ -13,8 +13,14 @@ class Product extends Model
     protected $hidden = ['deleted_at'];
     protected $table = 'product';
     // 分享者的信息
-    public function share()
+    public function sharer()
     {
-        return $this->hasOne('App\Model\Share');
+        return $this->belongsTo('App\Model\Sharer');
+    }
+
+    // 分享者的信息
+    public function order()
+    {
+        return $this->hasMany('App\Model\Order');
     }
 }

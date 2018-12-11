@@ -13,15 +13,16 @@ class Order extends Model
 
     protected $dates = ['deleted_at', 'created_at', 'updated_at'];
     protected $hidden = ['deleted_at'];
+
     // 分享者的信息
     public function user()
     {
-        return $this->hasOne('App\Model\User');
+        return $this->belongsTo('App\Model\User');
     }
 
     // 分享者的信息
     public function product()
     {
-        return $this->hasOne('App\Model\Product');
+        return $this->belongsTo('App\Model\Product');
     }
 }

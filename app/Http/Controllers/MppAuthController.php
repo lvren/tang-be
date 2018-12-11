@@ -297,8 +297,25 @@ class MppAuthController extends Controller
             throw new Exception('获取用户信息失败');
         }
 
-        $orderList = Order::with(['product', 'user'])->select(['order_id', 'is_pay', 'user_id', 'product_id', 'price', 'created_at'])->where('user_id', $user->id)->get();
-        return ['status' => true, 'data' => $orderList];
+        $orderList = Order::with(['product'])
+            ->select(['order_id', 'is_pay', 'user_id', 'product_id', 'price', 'created_at'])
+            ->where('user_id', $user->id)
+            ->get();
+
+        $orderInfo = [];
+        foreach ($orderList as $key => $value) {
+            $info = [
+                'orderId' => $value->order_id,
+                'isPay' => $value->is_pay,
+                'price' => $value->price,
+                'productName' => $value->product->title,
+                'productDesc' => $value->product->desc,
+                'sharer' => $value->product->sharer->name,
+                'createdAt' => $value->created_at->format('Y-m-d H:i'),
+            ];
+            array_push($orderInfo, $info);
+        }
+        return ['status' => true, 'data' => $orderInfo];
     }
 
     public function getUserInfo(Request $request)
