@@ -61,7 +61,7 @@ class MppAuthController extends Controller
         return [
             'status' => true,
             'message' => 'success',
-            'data' => ['sessionKey' => $sessionKey, 'hasLogin' => $hasLogin],
+            'data' => ['sessionKey' => $sessionKey, 'hasLogin' => $hasLogin, 'userInfo' => $user],
         ];
     }
     // 保存用户信息回调
@@ -317,7 +317,7 @@ class MppAuthController extends Controller
         }
         return ['status' => true, 'data' => $orderInfo];
     }
-
+    // 获取用户信息
     public function getUserInfo(Request $request)
     {
         $sessionKey = $request->input('sessionKey');
@@ -329,16 +329,15 @@ class MppAuthController extends Controller
         $sessionInfo = json_decode($sessionInfo, true);
         // 用登录信息换取用户信息
         $unionid = $sessionInfo['unionid'];
-        $user = User::where('uuid', $unionid)->first();
+        $user = User::where('unionid', $unionid)->first();
         if (!$user) {
             throw new Exception('获取用户信息失败');
         }
 
         return ['status' => true, 'data' => $user];
     }
-
-    // 完善用户信息
-    public function saveUserInfo(Request $request)
+    // 绑定手机
+    public function saveUserMobile(Request $request)
     {
         $sessionKey = $request->input('sessionKey');
         // 拿到自己生成的sessionKey，获取登录信息
@@ -356,7 +355,6 @@ class MppAuthController extends Controller
 
         $mobile = $request->input('mobile');
         $code = $request->input('code');
-        $weixin = $request->input('weixin');
 
         if (!$mobile) {
             throw new Exception('没有指定手机号码');
@@ -364,16 +362,66 @@ class MppAuthController extends Controller
         if (!$code) {
             throw new Exception('没有填写验证码');
         }
-        if (!$weixin) {
-            throw new Exception('没有填写验证码');
-        }
 
         SmsController::validateSmsCode($code, $mobile);
-
+        Log::info($mobile);
         $user->mobile = $mobile;
+        $status = $user->save();
+        Log::info($status);
+        return ['status' => true, 'message' => '绑定手机成功'];
+    }
+    // 绑定微信号
+    public function saveUserWeixin(Request $request)
+    {
+        $sessionKey = $request->input('sessionKey');
+        // 拿到自己生成的sessionKey，获取登录信息
+        $sessionInfo = Cache::get($sessionKey);
+        if (!$sessionInfo) {
+            throw new Exception('用户登录信息失效');
+        }
+        $sessionInfo = json_decode($sessionInfo, true);
+        // 用登录信息换取用户信息
+        $unionid = $sessionInfo['unionid'];
+        $user = User::where('unionid', $unionid)->first();
+        if (!$user) {
+            throw new Exception('获取用户信息失败');
+        }
+
+        $weixin = $request->input('weixin');
+
+        if (!$weixin) {
+            throw new Exception('没有指定微信号');
+        }
+
         $user->weixin = $weixin;
         $user->save();
+        return ['status' => true, 'message' => '绑定用户微信成功'];
+    }
+    // 修改用户名
+    public function saveUserNickname(Request $request)
+    {
+        $sessionKey = $request->input('sessionKey');
+        // 拿到自己生成的sessionKey，获取登录信息
+        $sessionInfo = Cache::get($sessionKey);
+        if (!$sessionInfo) {
+            throw new Exception('用户登录信息失效');
+        }
+        $sessionInfo = json_decode($sessionInfo, true);
+        // 用登录信息换取用户信息
+        $unionid = $sessionInfo['unionid'];
+        $user = User::where('unionid', $unionid)->first();
+        if (!$user) {
+            throw new Exception('获取用户信息失败');
+        }
 
-        return ['status' => true, 'message' => '验证成功'];
+        $nickname = $request->input('nickname');
+
+        if (!$nickname) {
+            throw new Exception('没有输入用户名');
+        }
+
+        $user->nickname = $nickname;
+        $user->save();
+        return ['status' => true, 'message' => '修改用户名成功'];
     }
 }

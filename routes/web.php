@@ -39,3 +39,9 @@ $router->get('/mapi/orderCallback', 'MppAuthController@orderCallback');
 $router->get('/mapi/country', 'MppAuthController@getCountryList');
 $router->get('/mapi/sharer', 'MppAuthController@getSharerList');
 $router->get('/mapi/userProduct', 'MppAuthController@getUserProductList');
+
+$router->get('/mapi/userInfo', 'MppAuthController@getUserInfo');
+$router->get('/mapi/saveMobile', 'MppAuthController@saveUserMobile');
+$router->get('/mapi/saveWeixin', 'MppAuthController@saveUserWeixin');
+$router->get('/mapi/saveNickname', 'MppAuthController@saveUserNickname');
+$router->get('/mapi/sendCode', 'SmsController@sendSmsCode');

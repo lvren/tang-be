@@ -12,11 +12,6 @@ use Qcloud\Sms\SmsSingleSender;
  */
 class SmsController extends Controller
 {
-    public function __construct()
-    {
-        $this->middleware('auth');
-    }
-
     public function sendSmsCode(Request $request)
     {
         if (!$request->has('mobile')) {
