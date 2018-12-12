@@ -109,6 +109,7 @@ class MppAuthController extends Controller
         $sessionKey = $request->input('sessionKey');
         $product = $request->input('product');
         $number = $request->input('number', 1);
+        $orderId = $request->input('order');
         // 拿到自己生成的sessionKey，获取登录信息
         $sessionInfo = Cache::get($sessionKey);
         if (!$sessionInfo) {
@@ -134,12 +135,17 @@ class MppAuthController extends Controller
         $userId = $user->id;
         $orderStatus = $user->weixin && $user->weixin !== '' ? 1 : 0;
 
-        $order = Order::where('user_id', $userId)
-            ->where('product_id', $productMod->id)
-            ->first();
+        $order;
+        if ($orderId) {
+            $order = Order::where('user_id', $userId)->first();
+        } else {
+            $order = Order::where('order_id', $orderId)
+                ->where('product_id', $productMod->id)
+                ->first();
+        }
         if ($order) {
             if ($order->isPay && $productMod->is_once) {
-                throw new Exception('当前商品同一个用户只能购买一次');
+                throw new Exception('当前商品同一个用户只能购买一次,可以在“我的->我的服务”中查看已购买的服务');
             }
             $jsApiParameters = $order->pre_param;
         } else {
@@ -308,8 +314,9 @@ class MppAuthController extends Controller
                 'orderId' => $value->order_id,
                 'isPay' => $value->is_pay,
                 'price' => $value->price,
-                'productName' => $value->product->title,
+                'productTitle' => $value->product->title,
                 'productDesc' => $value->product->desc,
+                'productName' => $value->product->name,
                 'sharer' => $value->product->sharer->name,
                 'createdAt' => $value->created_at->format('Y-m-d H:i'),
             ];
