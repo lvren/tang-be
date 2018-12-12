@@ -137,14 +137,14 @@ class MppAuthController extends Controller
 
         $order;
         if ($orderId) {
-            $order = Order::where('user_id', $userId)->first();
+            $order = Order::where('order_id', $orderId)->first();
         } else {
-            $order = Order::where('order_id', $orderId)
+            $order = Order::where('user_id', $userId)
                 ->where('product_id', $productMod->id)
                 ->first();
         }
         if ($order) {
-            if ($order->isPay && $productMod->is_once) {
+            if ($order->is_pay && $productMod->is_once) {
                 throw new Exception('当前商品同一个用户只能购买一次,可以在“我的->我的服务”中查看已购买的服务');
             }
             $jsApiParameters = $order->pre_param;
