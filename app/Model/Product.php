@@ -18,7 +18,7 @@ class Product extends Model
         return $this->belongsTo('App\Model\Sharer');
     }
 
-    // 分享者的信息
+    // 订单信息
     public function order()
     {
         return $this->hasMany('App\Model\Order');
