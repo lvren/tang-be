@@ -1,4 +1,7 @@
 <?php
+
+namespace App\Http\Lib\WxPay;
+
 /**
  * 工厂函数
  * @param int $sdkappid 应用的appid
@@ -12,7 +15,6 @@ function createRestAPI()
 
 abstract class TimRestInterface
 {
-
     /**
      * 初始化函数
      * @param string $sdkappid 应用的appid
@@ -25,10 +27,10 @@ abstract class TimRestInterface
      * 独立模式根据Identifier生成UserSig的方法
      * @param int $identifier 用户账号
      * @param int $expiry_after 过期时间
-     * @param string $protected_key_path 私钥的存储路径及文件名
+     * @param string $key_path 公私钥的存储路径
      * @return string $out 返回的签名字符串
      */
-    abstract public function generate_user_sig($identifier, $expiry_after, $protected_key_path, $tool_path);
+    abstract public function generate_user_sig($identifier, $key_path, $expiry_after);
 
     /**
      * 托管模式设置用户凭证

@@ -34,17 +34,19 @@ $router->get('/api/getAdvanceUser', 'AuthController@getAdvanceUser');
 
 $router->get('/mapi/openid', 'MppAuthController@mAppCode2Session');
 $router->post('/mapi/saveUserInfo', 'MppAuthController@mAppSaveUserInfo');
-$router->post('/mapi/payment', 'MppAuthController@getPayParam');
-$router->get('/mapi/orderCallback', 'MppAuthController@orderCallback');
-$router->get('/mapi/country', 'MppAuthController@getCountryList');
-$router->get('/mapi/sharer', 'MppAuthController@getSharerList');
-$router->get('/mapi/userProduct', 'MppAuthController@getUserProductList');
-$router->get('/mapi/getSharer', 'MppAuthController@getSharerInfo');
 
-$router->get('/mapi/userInfo', 'MppAuthController@getUserInfo');
-$router->get('/mapi/saveMobile', 'MppAuthController@saveUserMobile');
-$router->get('/mapi/saveWeixin', 'MppAuthController@saveUserWeixin');
-$router->get('/mapi/saveNickname', 'MppAuthController@saveUserNickname');
+$router->post('/mapi/payment', 'MppOrderController@getPayParam');
+$router->get('/mapi/orderCallback', 'MppOrderController@orderCallback');
+
+$router->get('/mapi/country', 'MppBaseInfoController@getCountryList');
+$router->get('/mapi/sharer', 'MppBaseInfoController@getSharerList');
+$router->get('/mapi/userProduct', 'MppBaseInfoController@getUserProductList');
+$router->get('/mapi/getSharer', 'MppBaseInfoController@getSharerInfo');
+$router->get('/mapi/userInfo', 'MppBaseInfoController@getUserInfo');
+$router->get('/mapi/saveMobile', 'MppBaseInfoController@saveUserMobile');
+$router->get('/mapi/saveWeixin', 'MppBaseInfoController@saveUserWeixin');
+$router->get('/mapi/saveNickname', 'MppBaseInfoController@saveUserNickname');
+
 $router->get('/mapi/sendCode', 'SmsController@sendSmsCode');
 
 $router->get('/mapi/im', 'ImController@sendSmsCode');

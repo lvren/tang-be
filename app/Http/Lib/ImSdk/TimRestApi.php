@@ -1,5 +1,10 @@
 <?php
-require_once dirname(__FILE__) . '/TimRestInterface.php';
+
+namespace App\Http\Lib\ImSdk;
+
+use TimRestInterface;
+use TLSSigAPI;
+
 class TimRestAPI extends TimRestInterface
 {
     #app基本信息
@@ -100,24 +105,23 @@ class TimRestAPI extends TimRestInterface
     /**
      * 独立模式根据Identifier生成UserSig的方法
      * @param int $identifier 用户账号
-     * @param int $expiry_after 过期时间
-     * @param string $protected_key_path 私钥的存储路径及文件名
+     * @param int $expire 过期时间
+     * @param string $key_path 公私钥的存储路径及文件名
      * @return string $out 返回的签名字符串
      */
-    public function generate_user_sig($identifier, $expiry_after, $protected_key_path, $tool_path)
+    public function generate_user_sig($identifier, $key_path, $expire = 180 * 24 * 3600)
     {
+        # 改用PHP接口生成sig
+        $api = new TLSSigAPI();
+        $api->SetAppid($this->sdkappid);
+        $private = file_get_contents($key_path . 'private_key');
+        $api->SetPrivateKey($private);
+        $public = file_get_contents($key_path . 'public_key');
+        $api->SetPublicKey($public);
+        $sig = $api->genSig($identifier, $expire);
 
-        # 这里需要写绝对路径，开发者根据自己的路径进行调整
-        $command = escapeshellarg($tool_path)
-        . ' ' . escapeshellarg($protected_key_path)
-        . ' ' . escapeshellarg($this->sdkappid)
-        . ' ' . escapeshellarg($identifier);
-        $ret = exec($command, $out, $status);
-        if ($status == -1) {
-            return null;
-        }
-        $this->usersig = $out[0];
-        return $out;
+        $this->usersig = $sig;
+        return $sig;
     }
 
     /**
