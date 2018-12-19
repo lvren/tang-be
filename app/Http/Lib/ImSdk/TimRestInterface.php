@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Lib\WxPay;
+namespace App\Http\Lib\ImSdk;
 
 /**
  * 工厂函数

@@ -1,6 +1,8 @@
 <?php
 
-namespace App\Http\Lib\WxPay;
+namespace App\Http\Lib\ImSdk;
+
+use Exception;
 
 if (!extension_loaded('openssl')) {
     trigger_error('need openssl extension', E_USER_ERROR);

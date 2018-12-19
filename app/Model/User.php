@@ -23,4 +23,14 @@ class User extends Model
     {
         return $this->hasMany('App\Model\Evaluate');
     }
+
+    public function imUser()
+    {
+        return $this->hasOne('App\Model\ImUser');
+    }
+
+    public function sharer()
+    {
+        return $this->hasOne('App\Model\Sharer');
+    }
 }

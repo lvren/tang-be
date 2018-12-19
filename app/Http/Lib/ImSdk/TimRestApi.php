@@ -2,8 +2,7 @@
 
 namespace App\Http\Lib\ImSdk;
 
-use TimRestInterface;
-use TLSSigAPI;
+use Log;
 
 class TimRestAPI extends TimRestInterface
 {
@@ -54,16 +53,12 @@ class TimRestAPI extends TimRestInterface
         $url = $this->http_type . $this->im_yun_url . '/' . $this->version . '/' . $service_name . '/' . $cmd_name . '?' . $parameter;
 
         if ($print_flag) {
-            echo "Request Url:\n";
-            echo $url;
-            echo "\n";
-            echo "Request Body:\n";
-            echo json_format($req_tmp);
-            echo "\n";
+            Log::info("IM Request Url:\n" . $url);
+            Log::info("IM Request Body:\n", $req_tmp);
         }
+
         $ret = $this->http_req('https', 'post', $url, $req_data);
         return $ret;
-
     }
 
     /**
@@ -90,12 +85,8 @@ class TimRestAPI extends TimRestInterface
         $url = $this->http_type . $this->im_yun_url . '/' . $this->version . '/' . $service_name . '/' . $cmd_name . '?' . $parameter;
 
         if ($print_flag) {
-            echo "Request Url:\n";
-            echo $url;
-            echo "\n";
-            echo "Request Body:\n";
-            echo json_format($req_tmp);
-            echo "\n";
+            Log::info("Request Url:\n", $url, "\nRequest Body:\n");
+            Log::info($req_tmp);
         }
         $ret = $this->http_req_multi('https', 'post', $url, $req_tmp);
         return $ret;
@@ -233,7 +224,7 @@ class TimRestAPI extends TimRestInterface
                 return $ret;
             }
             $ret = json_decode($ret, true);
-            echo json_format($ret);
+            Log::info($ret);
         }
         curl_multi_close($mh);
         return true;
@@ -364,7 +355,7 @@ class TimRestAPI extends TimRestInterface
         $req_data = json_encode($msg);
         $ret = $this->api("openpic", "pic_up", $this->identifier, $this->usersig, $req_data, false);
         $ret = json_decode($ret, true);
-        echo json_format($ret);
+        Log::info($ret);
         return $ret;
     }
 
@@ -1428,69 +1419,6 @@ class TimRestAPI extends TimRestInterface
 //辅助过滤器类
 class Filter
 {};
-
-/** Json数据格式化方法
- * @param array $data 数组数据
- * @param string $indent 缩进字符，默认4个空格
- * @return sting json格式字符串
- */
-function json_format($data, $indent = null)
-{
-
-    // 对数组中每个元素递归进行urlencode操作，保护中文字符
-    array_walk_recursive($data, 'json_format_protect');
-
-    // json encode
-    $data = json_encode($data);
-
-    // 将urlencode的内容进行urldecode
-    $data = urldecode($data);
-
-    // 缩进处理
-    $ret = '';
-    $pos = 0;
-    $length = strlen($data);
-    $indent = isset($indent) ? $indent : '    ';
-    $newline = "\n";
-    $prevchar = '';
-    $outofquotes = true;
-    for ($i = 0; $i <= $length; $i++) {
-        $char = substr($data, $i, 1);
-        if ($char == '"' && $prevchar != '\\') {
-            $outofquotes = !$outofquotes;
-        } elseif (($char == '}' || $char == ']') && $outofquotes) {
-            $ret .= $newline;
-            $pos--;
-            for ($j = 0; $j < $pos; $j++) {
-                $ret .= $indent;
-            }
-        }
-        $ret .= $char;
-        if (($char == ',' || $char == '{' || $char == '[') && $outofquotes) {
-            $ret .= $newline;
-            if ($char == '{' || $char == '[') {
-                $pos++;
-            }
-
-            for ($j = 0; $j < $pos; $j++) {
-                $ret .= $indent;
-            }
-        }
-        $prevchar = $char;
-    }
-    return $ret;
-}
-
-/**
- * json_formart辅助函数
- * @param String $val 数组元素
- */
-function json_format_protect(&$val)
-{
-    if ($val !== true && $val !== false && $val !== null) {
-        $val = urlencode($val);
-    }
-}
 
 /**
  * 判断操作系统位数
