@@ -175,4 +175,44 @@ class AuthController extends Controller
         $constentJson = json_decode((string) $body);
         $jsTickt = $constentJson->ticket;
     }
+
+    public function sendCustomMsg(Request $request)
+    {
+        $toUser = $request->input('toUser');
+        $msg = $request->input('msg');
+
+        $client = new Client([
+            'base_uri' => 'https://api.weixin.qq.com',
+        ]);
+
+        $clientResp = $client->request(
+            'GET',
+            '/cgi-bin/token',
+            [
+                'query' => [
+                    'appid' => env('WEIXIN_ID'),
+                    'secret' => env('WEIXIN_SECRET'),
+                    'grant_type' => 'client_credential',
+                ],
+            ]
+        );
+
+        $clientAccess = json_decode((string) $clientResp->getBody());
+        $accessToken = $clientAccess->access_token;
+
+        $msgRes = $client->request(
+            'POST',
+            '/cgi-bin/message/custom/send?access_token=' . $accessToken,
+            [
+                'json' => [
+                    'touser' => $toUser,
+                    'msgtype' => 'text',
+                    'text' => [
+                        'content' => $msg,
+                    ],
+                ],
+            ]
+        );
+        return (string) $msgRes->getBody();
+    }
 }

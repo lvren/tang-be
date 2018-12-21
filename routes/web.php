@@ -12,6 +12,7 @@
  */
 
 $router->get('/api/sendCode', 'SmsController@sendSmsCode');
+$router->get('/api/sendCustomMsg', 'AuthController@sendCustomMsg');
 
 $router->get('/api/orderNotify', 'OrderController@orderNotify');
 $router->get('/api/checkOrder', 'OrderController@checkOrder');
