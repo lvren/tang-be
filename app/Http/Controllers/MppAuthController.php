@@ -3,7 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Exceptions\ErrorMsgException as Exception;
+use App\Http\Components\ImComponent;
 use App\Http\Components\WXBizDataCrypt;
+use App\Model\ImUser;
 use App\Model\User;
 use Cache;
 use GuzzleHttp\Client;
@@ -42,7 +44,7 @@ class MppAuthController extends Controller
         $sessionKey = Str::orderedUuid();
         Cache::forever($sessionKey, json_encode($resJson));
 
-        $user = User::where('unionid', $resJson['unionid'])->first();
+        $user = User::with('imUser')->where('unionid', $resJson['unionid'])->first();
         $hasLogin = true;
         if (!$user) {
             $user = new User();
@@ -50,6 +52,9 @@ class MppAuthController extends Controller
             $user->unionid = isset($resJson['unionid']) ? $resJson['unionid'] : null;
             $user->save();
             $hasLogin = false;
+        }
+        if ($user->imUser) {
+            $user->imUser->app_id = env('IM_ID');
         }
 
         return $this->successResponse([
@@ -94,7 +99,23 @@ class MppAuthController extends Controller
             $user->avatarUrl = $data['avatarUrl'];
             $user->save();
         }
-
-        return ['stauts' => true, 'data' => $user];
+        $imUser = $user->imUser;
+        if (!$imUser) {
+            $ImComponent = new ImComponent();
+            $api = $ImComponent->createRestAPI();
+            $res = $api->account_import($user->unionid, $user->nickName, $user->avatarUrl);
+            if ($res['ActionStatus'] === 'OK') {
+                $sig = $api->generateUserSig($user->unionid);
+                $imUser = new ImUser();
+                $imUser->user_id = $user->id;
+                $imUser->account = $user->unionid;
+                $imUser->sig = $sig;
+                $imUser->save();
+            }
+        }
+        $imUser->app_id = env('IM_ID');
+        $userArr = $user->toArray();
+        $userArr['imUser'] = $imUser;
+        return $this->successResponse($userArr);
     }
 }

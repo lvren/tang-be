@@ -51,3 +51,4 @@ $router->get('/mapi/sendCode', 'SmsController@sendSmsCode');
 
 $router->get('/mapi/im', 'ImController@sendSmsCode');
 $router->get('/mapi/im/accountImport', 'ImController@accountImport');
+$router->get('/mapi/im/sendToMe', 'ImController@sendToMe');

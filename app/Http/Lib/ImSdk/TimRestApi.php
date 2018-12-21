@@ -553,7 +553,6 @@ class TimRestAPI extends TimRestInterface
 
     public function account_import($identifier, $nick, $face_url)
     {
-
         #构造新消息
         $msg = array(
             'Identifier' => $identifier,

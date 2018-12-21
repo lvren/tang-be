@@ -42,4 +42,16 @@ class ImController extends Controller
         }
         return ['status' => true, 'message' => '导出账号成功'];
     }
+
+    public function sendToMe(Request $request)
+    {
+        $user = $request->user();
+        $ImComponent = new ImComponent();
+
+        $api = $ImComponent->createRestAPI();
+        // $api->account_import($user->unionid, '吕任', $user->avatarUrl);
+        // $res = $api->profile_portrait_get($user->unionid);
+        $res = $api->openim_send_msg('oTsm11PW1XFVMr3DvgRClk5P_avw', $user->unionid, '测试消息');
+        return $res;
+    }
 }

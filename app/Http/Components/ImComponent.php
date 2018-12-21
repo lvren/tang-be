@@ -34,4 +34,9 @@ class ImComponent
 
         return $this->api;
     }
+
+    public function generateUserSig($identifier)
+    {
+        return $this->api->generate_user_sig($identifier, $this->key_path);
+    }
 }
