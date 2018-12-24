@@ -187,7 +187,7 @@ class MppOrderController extends Controller
         $client = new Client([
             'base_uri' => 'https://api.weixin.qq.com',
         ]);
-        Log::info($formId);
+        Log::info($prepayId);
         $clientResp = $client->request(
             'GET',
             '/cgi-bin/token',
