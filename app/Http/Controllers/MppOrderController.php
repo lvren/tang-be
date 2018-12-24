@@ -12,6 +12,7 @@ use App\Model\Order;
 use App\Model\Product;
 use App\Model\User;
 use Cache;
+use GuzzleHttp\Client;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Log;
@@ -162,6 +163,12 @@ class MppOrderController extends Controller
             $order->is_pay = 1;
             $order->transaction_id = $transactionId;
             $order->save();
+
+            $preParam = json_decode($order->pre_param);
+            $package = $preParam->package;
+            list($key, $prepayId) = split("=", $package);
+
+            $this->sendCustomMsg($prepayId);
         } else {
             $order->error_msg = $errorMsg;
             $order->save();
@@ -169,5 +176,57 @@ class MppOrderController extends Controller
         }
 
         return ['status' => true, 'message' => '保存order信息成功'];
+    }
+
+    private function sendCustomMsg($formId)
+    {
+        $client = new Client([
+            'base_uri' => 'https://api.weixin.qq.com',
+        ]);
+        Log::info($formId);
+        // ['oCfH94xcK74iVo8IjgiMO5zoE1ws']
+        $clientResp = $client->request(
+            'GET',
+            '/cgi-bin/token',
+            [
+                'query' => [
+                    'appid' => env('MAPP_ID'),
+                    'secret' => env('MAPP_SECRET'),
+                    'grant_type' => 'client_credential',
+                ],
+            ]
+        );
+
+        $clientAccess = json_decode((string) $clientResp->getBody());
+        $accessToken = $clientAccess->access_token;
+
+        $msgRes = $client->request(
+            'POST',
+            '/cgi-bin/message/wxopen/template/send?access_token=' . $accessToken,
+            [
+                'json' => [
+                    'access_token' => $accessToken,
+                    'touser' => 'oCfH94xcK74iVo8IjgiMO5zoE1ws',
+                    'template_id' => 'Fzde9Vp-EoYjAKSV89RpVpKcXcYQFJgIVD0J9gbBQLs',
+                    'form_Id' => $formId,
+                    "data" => [
+                        "keyword1" => [
+                            "value" => "测试",
+                        ],
+                        "keyword2" => [
+                            "value" => "2018-06-07 10:20",
+                        ],
+                        "keyword3" => [
+                            "value" => "ken",
+                        ],
+                        "keyword4" => [
+                            "value" => "6小时",
+                        ],
+                    ],
+                ],
+            ]
+        );
+        Log::info((string) $msgRes->getBody());
+        return (string) $msgRes->getBody();
     }
 }
