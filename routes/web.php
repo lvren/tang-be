@@ -40,8 +40,12 @@ $router->get('/mapi/orderCallback', 'MppOrderController@orderCallback');
 
 $router->get('/mapi/country', 'MppBaseInfoController@getCountryList');
 $router->get('/mapi/sharer', 'MppBaseInfoController@getSharerList');
-$router->get('/mapi/userProduct', 'MppBaseInfoController@getUserProductList');
+$router->get('/mapi/getReferSharer', 'MppBaseInfoController@getReferSharer');
+$router->get('/mapi/getReferBySharer', 'MppBaseInfoController@getReferBySharer');
 $router->get('/mapi/getSharer', 'MppBaseInfoController@getSharerInfo');
+$router->get('/mapi/getOrderInfo', 'MppBaseInfoController@getOrderInfo');
+
+$router->get('/mapi/userProduct', 'MppBaseInfoController@getUserProductList');
 $router->get('/mapi/userInfo', 'MppBaseInfoController@getUserInfo');
 $router->get('/mapi/saveMobile', 'MppBaseInfoController@saveUserMobile');
 $router->get('/mapi/saveWeixin', 'MppBaseInfoController@saveUserWeixin');

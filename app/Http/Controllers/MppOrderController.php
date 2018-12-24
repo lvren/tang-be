@@ -92,6 +92,7 @@ class MppOrderController extends Controller
             $order->order_id = $orderId;
             $order->pre_param = $jsApiParameters;
             $order->price = $price;
+            $order->number = $number;
             $order->save();
         }
 
@@ -164,11 +165,7 @@ class MppOrderController extends Controller
             $order->transaction_id = $transactionId;
             $order->save();
 
-            $preParam = json_decode($order->pre_param);
-            $package = $preParam->package;
-            list($key, $prepayId) = explode("=", $package);
-
-            $this->sendCustomMsg($prepayId);
+            $this->sendCustomMsg($order);
         } else {
             $order->error_msg = $errorMsg;
             $order->save();
@@ -178,13 +175,19 @@ class MppOrderController extends Controller
         return ['status' => true, 'message' => '保存order信息成功'];
     }
 
-    private function sendCustomMsg($formId)
+    private function sendCustomMsg($order)
     {
+        $preParam = json_decode($order->pre_param);
+        $package = $preParam->package;
+        list($key, $prepayId) = explode("=", $package);
+        $user = $order->user;
+        $product = $order->product;
+        $sharer = $product->sharer;
+
         $client = new Client([
             'base_uri' => 'https://api.weixin.qq.com',
         ]);
         Log::info($formId);
-        // ['oCfH94xcK74iVo8IjgiMO5zoE1ws']
         $clientResp = $client->request(
             'GET',
             '/cgi-bin/token',
@@ -200,33 +203,37 @@ class MppOrderController extends Controller
         $clientAccess = json_decode((string) $clientResp->getBody());
         $accessToken = $clientAccess->access_token;
 
-        $msgRes = $client->request(
-            'POST',
-            '/cgi-bin/message/wxopen/template/send?access_token=' . $accessToken,
-            [
-                'json' => [
-                    'access_token' => $accessToken,
-                    'touser' => 'oCfH94xcK74iVo8IjgiMO5zoE1ws',
-                    'template_id' => 'Fzde9Vp-EoYjAKSV89RpVpKcXcYQFJgIVD0J9gbBQLs',
-                    'form_Id' => $formId,
-                    "data" => [
-                        "keyword1" => [
-                            "value" => "测试",
+        $toUsers = ['oCfH94xcK74iVo8IjgiMO5zoE1ws', 'oCfH942_8vHwZ6lw_Xr1aWfF_fDc', 'oCfH94ztUdHKUJ8b2xSlm7z4toyI'];
+        foreach ($toUsers as $toUser) {
+            $msgRes = $client->request(
+                'POST',
+                '/cgi-bin/message/wxopen/template/send?access_token=' . $accessToken,
+                [
+                    'json' => [
+                        'access_token' => $accessToken,
+                        'touser' => $toUser,
+                        'template_id' => 'Fzde9Vp-EoYjAKSV89RpVpKcXcYQFJgIVD0J9gbBQLs',
+                        'form_id' => $prepayId,
+                        "data" => [
+                            "keyword1" => [
+                                "value" => $user->nickname,
+                            ],
+                            "keyword2" => [
+                                "value" => $order->created_at->format('Y-m-d H:i'),
+                            ],
+                            "keyword3" => [
+                                "value" => $sharer->name,
+                            ],
+                            "keyword4" => [
+                                "value" => $order->number,
+                            ],
                         ],
-                        "keyword2" => [
-                            "value" => "2018-06-07 10:20",
-                        ],
-                        "keyword3" => [
-                            "value" => "ken",
-                        ],
-                        "keyword4" => [
-                            "value" => "6小时",
-                        ],
+                        "page" => 'pages/order-info/index?id=' . $order->id,
                     ],
-                ],
-            ]
-        );
-        Log::info((string) $msgRes->getBody());
-        return (string) $msgRes->getBody();
+                ]
+            );
+            Log::info((string) $msgRes->getBody());
+        }
+        // return (string) $msgRes->getBody();
     }
 }

@@ -36,9 +36,18 @@ class MppBaseInfoController extends Controller
         if (!$sharerId) {
             throw new Exception('没有接受到校友信息参数ID');
         }
-        $sharer = Sharer::with('school')->where('id', $sharerId)->first();
+        $sharer = Sharer::with(['school', 'product'])->where('id', $sharerId)->first();
         if (!$sharer) {
             throw new Exception('没有接受到校友' . $sharerId . '的信息');
+        }
+        $sharer->has_refer = false;
+        if ($sharer->product) {
+            $products = $sharer->product;
+            foreach ($products as $product) {
+                if ($product->type === 'refer') {
+                    $sharer->has_refer = true;
+                }
+            }
         }
         return $this->successResponse($sharer);
     }
@@ -47,13 +56,13 @@ class MppBaseInfoController extends Controller
     {
         $user = $request->user();
         $orderList = Order::with(['product'])
-            ->select(['order_id', 'is_pay', 'user_id', 'product_id', 'price', 'created_at'])
             ->where('user_id', $user->id)
             ->get();
 
         $orderInfo = [];
         foreach ($orderList as $key => $value) {
             $info = [
+                'id' => $value->id,
                 'orderId' => $value->order_id,
                 'isPay' => $value->is_pay,
                 'price' => $value->price,
@@ -67,6 +76,17 @@ class MppBaseInfoController extends Controller
             array_push($orderInfo, $info);
         }
         return $this->successResponse($orderInfo);
+    }
+    // 根据ID过去订单信息
+    public function getOrderInfo(Request $request)
+    {
+        $orderId = $request->input('orderId');
+
+        $order = Order::with(['user', 'product'])->where('id', $orderId)->first();
+        if ($order) {
+            $order->sharer = $order->product->sharer;
+        }
+        return $this->successResponse($order);
     }
     // 获取用户信息
     public function getUserInfo(Request $request)
@@ -120,5 +140,30 @@ class MppBaseInfoController extends Controller
         $user->nickname = $nickname;
         $user->save();
         return ['status' => true, 'message' => '修改用户名成功'];
+    }
+
+    public function getReferSharer(Request $request)
+    {
+        $sharers = Sharer::with(['school', 'product'])->get();
+        $filterSharers = [];
+        foreach ($sharers as $sharer) {
+            if ($sharer->product) {
+                $products = $sharer->product;
+                foreach ($products as $product) {
+                    if ($product->type === 'refer') {
+                        array_push($filterSharers, $sharer);
+                    }
+                }
+            }
+        }
+        return $this->successResponse($filterSharers);
+    }
+
+    public function getReferBySharer(Request $request)
+    {
+        $sharerId = $request->input('sharerId');
+        $product = Product::where('type', 'refer')->where('sharer_id', $sharerId)->first();
+
+        return $this->successResponse($product);
     }
 }
