@@ -166,7 +166,7 @@ class MppOrderController extends Controller
 
             $preParam = json_decode($order->pre_param);
             $package = $preParam->package;
-            list($key, $prepayId) = split("=", $package);
+            list($key, $prepayId) = explode("=", $package);
 
             $this->sendCustomMsg($prepayId);
         } else {
