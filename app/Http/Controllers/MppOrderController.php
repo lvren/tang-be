@@ -193,8 +193,8 @@ class MppOrderController extends Controller
             '/cgi-bin/token',
             [
                 'query' => [
-                    'appid' => env('MAPP_ID'),
-                    'secret' => env('MAPP_SECRET'),
+                    'appid' => env('WEIXIN_ID'),
+                    'secret' => env('WEIXIN_SECRET'),
                     'grant_type' => 'client_credential',
                 ],
             ]
@@ -203,17 +203,21 @@ class MppOrderController extends Controller
         $clientAccess = json_decode((string) $clientResp->getBody());
         $accessToken = $clientAccess->access_token;
 
-        $toUsers = ['oCfH94xcK74iVo8IjgiMO5zoE1ws', 'oCfH942_8vHwZ6lw_Xr1aWfF_fDc', 'oCfH94ztUdHKUJ8b2xSlm7z4toyI'];
+        $toUsers = ['oTsm11KHmtYb4TtGHmaNFwmzrDsg', 'oTsm11Ae53daAoNacUst7_UZBVrY', 'oTsm11JaFiCfLw_UDyZtZNCXDoMc'];
         foreach ($toUsers as $toUser) {
             $msgRes = $client->request(
                 'POST',
-                '/cgi-bin/message/wxopen/template/send?access_token=' . $accessToken,
+                '/cgi-bin/message/template/send?access_token=' . $accessToken,
                 [
                     'json' => [
                         'access_token' => $accessToken,
                         'touser' => $toUser,
                         'template_id' => 'Fzde9Vp-EoYjAKSV89RpVpKcXcYQFJgIVD0J9gbBQLs',
-                        'form_id' => $prepayId,
+                        // 'form_id' => $prepayId,
+                        'miniprogram' => [
+                            'appid' => 'gh_8b3f25b28e7e',
+                            'pagepath' => 'pages/order-info/index?id=' . $order->id,
+                        ],
                         "data" => [
                             "keyword1" => [
                                 "value" => $user->nickname,
@@ -228,7 +232,6 @@ class MppOrderController extends Controller
                                 "value" => $order->number,
                             ],
                         ],
-                        "page" => 'pages/order-info/index?id=' . $order->id,
                     ],
                 ]
             );
