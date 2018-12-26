@@ -212,24 +212,30 @@ class MppOrderController extends Controller
                     'json' => [
                         'access_token' => $accessToken,
                         'touser' => $toUser,
-                        'template_id' => 'Fzde9Vp-EoYjAKSV89RpVpKcXcYQFJgIVD0J9gbBQLs',
+                        'template_id' => 'u6ui2mIn47DxRS10lRuN6oMkvYfcx2pPNVn3yJpDo6Q',
                         // 'form_id' => $prepayId,
                         'miniprogram' => [
                             'appid' => 'gh_8b3f25b28e7e',
                             'pagepath' => 'pages/order-info/index?id=' . $order->id,
                         ],
                         "data" => [
+                            "first" => [
+                                'value' => '用户' . $user->nickname . '于' . $order->created_at->format('Y-m-d H:i') . '下单成功',
+                            ],
                             "keyword1" => [
-                                "value" => $user->nickname,
+                                "value" => '留学问题',
                             ],
                             "keyword2" => [
-                                "value" => $order->created_at->format('Y-m-d H:i'),
-                            ],
-                            "keyword3" => [
                                 "value" => $sharer->name,
                             ],
+                            "keyword3" => [
+                                "value" => $order->number . '小时',
+                            ],
                             "keyword4" => [
-                                "value" => $order->number,
+                                "value" => '无',
+                            ],
+                            "remark" => [
+                                "value" => '点击可跳转小程序查看详细信息',
                             ],
                         ],
                     ],
