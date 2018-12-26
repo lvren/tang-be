@@ -215,7 +215,7 @@ class MppOrderController extends Controller
                         'template_id' => 'u6ui2mIn47DxRS10lRuN6oMkvYfcx2pPNVn3yJpDo6Q',
                         // 'form_id' => $prepayId,
                         'miniprogram' => [
-                            'appid' => 'gh_8b3f25b28e7e',
+                            'appid' => env('MAPP_ID'),
                             'pagepath' => 'pages/order-info/index?id=' . $order->id,
                         ],
                         "data" => [
