@@ -216,7 +216,7 @@ class MppOrderController extends Controller
                         // 'form_id' => $prepayId,
                         'miniprogram' => [
                             'appid' => env('MAPP_ID'),
-                            'pagepath' => 'pages/order-info/index?id=' . $order->id,
+                            'pagepath' => '/pages/order-info/index?id=' . $order->id,
                         ],
                         "data" => [
                             "first" => [
