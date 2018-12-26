@@ -40,7 +40,10 @@ class MppAuthController extends Controller
         if (isset($resJson['errcode']) && $resJson['errcode'] !== 0) {
             throw new Exception('错误码' . $resJson['errcode'] . ';错误信息' . $resJson['errmsg']);
         }
-
+        if (!isset($resJson['unionid'])) {
+            Log::error('小程序登录失败:没有拿到unionid');
+            throw new Exception('没有请求到小程序的unionid');
+        }
         $sessionKey = Str::orderedUuid();
         Cache::forever($sessionKey, json_encode($resJson));
 
