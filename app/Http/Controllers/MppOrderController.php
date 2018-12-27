@@ -220,7 +220,7 @@ class MppOrderController extends Controller
                         ],
                         "data" => [
                             "first" => [
-                                'value' => '用户' . $user->nickname . '于' . $order->created_at->format('Y-m-d H:i') . '下单成功',
+                                'value' => '用户' . $user->nickname . '(' . $user->weixin . ')' . '于' . $order->created_at->format('Y-m-d H:i') . '下单成功',
                             ],
                             "keyword1" => [
                                 "value" => '留学问题',
