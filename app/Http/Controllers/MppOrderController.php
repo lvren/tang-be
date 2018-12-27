@@ -56,6 +56,7 @@ class MppOrderController extends Controller
             $order = Order::where('order_id', $orderId)->first();
         } else {
             $order = Order::where('user_id', $userId)
+                ->where('is_pay', 0)
                 ->where('product_id', $productMod->id)
                 ->first();
         }
@@ -67,7 +68,6 @@ class MppOrderController extends Controller
         } else {
             $orderId = md5(Str::orderedUuid());
             $price = $productMod->price * $number;
-            Log:
             //②、统一下单
             $input = new WxPayUnifiedOrder();
             $input->SetBody("校友说分享");
