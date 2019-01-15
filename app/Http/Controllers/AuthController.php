@@ -3,8 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Exceptions\ErrorMsgException as Exception;
-use App\Model\Order;
-use App\Model\Product;
 use App\Model\User;
 use Cache;
 use GuzzleHttp\Client;
@@ -15,41 +13,12 @@ use Symfony\Component\HttpFoundation\Cookie;
 
 class AuthController extends Controller
 {
-    public function getAdvanceUser()
-    {
-        $payUser = Order::select('user_id')->where('product_id', 3)->where('is_pay', 1)->get();
-        $userInfo = User::whereIn('id', $payUser)->get();
-        $data = [];
-        foreach ($userInfo as $key => $value) {
-            array_push($data, [
-                '微信号' => $value->weixin,
-                '手机号' => $value->mobile,
-                '创建时间' => $value->updated_at,
-            ]);
-        }
-        return $data;
-    }
-
     public function isLogin(Request $request)
     {
         $user = $request->user();
         if ($user) {
             Log::info(json_encode($user));
-            $product = $request->input('product');
-            $productMod = Product::where('id', $product)->orWhere('name', $product)->first();
-            if (!$productMod) {
-                throw new Exception('没有指定的产品');
-            }
-            $order = Order::where('user_id', $user->userId)
-                ->where('product_id', $productMod->id)
-                ->first();
-            $orderParam = ['id' => null, 'status' => 0];
-            if ($order) {
-                $orderParam['id'] = $order->id;
-                $orderParam['status'] = $order->status;
-                $orderParam['isPay'] = $order->is_pay;
-            }
-            return ['status' => true, 'order' => $orderParam, 'message' => '存在用户登录信息'];
+            return ['status' => true, 'message' => '存在用户登录信息'];
         }
         return response('用户未登录', 401)->header('Content-Type', 'text/plain');
     }
@@ -57,14 +26,13 @@ class AuthController extends Controller
     public function userLogin(Request $request)
     {
         $redirectUrl = $request->input('redirect');
-        $appid = env('WEIXIN_ID');
+        $appid = env('WEB_ID');
         $redirect = 'http://talktoalumni.com/api/callback';
-        $api = 'https://open.weixin.qq.com/connect/oauth2/authorize?';
+        $api = 'https://open.weixin.qq.com/connect/qrconnect?';
         $api .= "appid={$appid}&";
         $api .= "redirect_uri={$redirect}&";
         $api .= "response_type=code&";
-        $api .= "scope=snsapi_userinfo&state={$redirectUrl}#wechat_redirect";
-
+        $api .= "scope=snsapi_login&state={$redirectUrl}#wechat_redirect";
         return redirect($api);
     }
 
@@ -73,8 +41,11 @@ class AuthController extends Controller
         if (!$request->has('code')) {
             throw new Exception('参数中缺少code');
         }
+        // code 微信返回的用来换取 access_token 的code
         $code = $request->input('code');
+        // state 是回调跳转地址
         $state = $request->input('state');
+
         $client = new Client([
             'base_uri' => 'https://api.weixin.qq.com',
         ]);
@@ -83,28 +54,15 @@ class AuthController extends Controller
             '/sns/oauth2/access_token',
             [
                 'query' => [
-                    'appid' => env('WEIXIN_ID'),
-                    'secret' => env('WEIXIN_SECRET'),
+                    'appid' => env('WEB_ID'),
+                    'secret' => env('WEB_SERCET'),
                     'code' => $code,
                     'grant_type' => 'authorization_code',
                 ],
             ]
         );
-
-        $clientResp = $client->request(
-            'GET',
-            '/cgi-bin/token',
-            [
-                'query' => [
-                    'appid' => env('WEIXIN_ID'),
-                    'secret' => env('WEIXIN_SECRET'),
-                    'grant_type' => 'client_credential',
-                ],
-            ]
-        );
-
-        $clientAccess = json_decode((string) $clientResp->getBody());
         $constentJson = json_decode((string) $accessResp->getBody(), true);
+        Log::info($constentJson);
 
         if (!isset($constentJson['access_token'])) {
             $errorMessage = '获取用户access_token失败';
@@ -113,34 +71,36 @@ class AuthController extends Controller
             }
             throw new Exception($errorMessage);
         }
-        $constentJson['clientAccess'] = isset($clientAccess->access_token) ? $clientAccess->access_token : false;
-        // 拉取用户详情信息
-        $userInfoResponse = $client->request(
-            'GET',
-            'sns/userinfo',
-            [
-                'query' => [
-                    'lang' => 'zh_CN',
-                    'openid' => $constentJson['openid'],
-                    'access_token' => $constentJson['access_token'],
-                ],
-            ]
-        );
 
-        $userInfo = json_decode((string) $userInfoResponse->getBody(), true);
-        $user = User::where('uuid', $constentJson['openid'])->first();
-        Log::info($userInfo);
+        $unionid;
+        $userInfo;
+        if (!isset($constentJson['unionid'])) {
+            $userInfoResp = $client->request(
+                'GET',
+                '/sns/userinfo',
+                [
+                    'query' => [
+                        'access_token' => $constentJson['access_token'],
+                        'openid' => $constentJson['openid'],
+                    ],
+                ]
+            );
+
+            $userInfo = json_decode((string) $userInfoResp->getBody(), true);
+            $unionid = isset($userInfo['unionid']) ? $userInfo['unionid'] : null;
+        } else {
+            $unionid = $constentJson['unionid'];
+        }
+
+        $user = User::where('unionid', $constentJson['unionid'])->first();
         if (!$user) {
             $user = new User();
             $user->uuid = $constentJson['openid'];
-            $user->unionid = $userInfo['unionid'];
-            $user->nickname = $userInfo['nickname'];
-            $user->avatarUrl = $userInfo['headimgurl'];
-            $user->save();
-        } else {
-            $user->unionid = $userInfo['unionid'];
-            $user->nickname = $userInfo['nickname'];
-            $user->avatarUrl = $userInfo['headimgurl'];
+            $user->unionid = $unionid;
+            if (isset($userInfo)) {
+                $user->nickname = $userInfo['nickname'];
+                $user->avatarUrl = $userInfo['headimgurl'];
+            }
             $user->save();
         }
 
@@ -153,26 +113,5 @@ class AuthController extends Controller
         }
         return response(['message' => '登录成功', 'status' => true])
             ->cookie($cookie);
-    }
-
-    private function getJsConfig($accessToken)
-    {
-        $client = new Client([
-            'base_uri' => 'https://api.weixin.qq.com',
-        ]);
-        $response = $client->request(
-            'GET',
-            '/cgi-bin/ticket/getticket',
-            [
-                'query' => [
-                    'access_token' => $accessToken,
-                    'type' => 'jsapi',
-                ],
-            ]
-        );
-
-        $body = $response->getBody();
-        $constentJson = json_decode((string) $body);
-        $jsTickt = $constentJson->ticket;
     }
 }

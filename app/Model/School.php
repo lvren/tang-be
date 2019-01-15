@@ -14,11 +14,11 @@ class School extends Model
     // 当前分享的分享产品
     public function country()
     {
-        return $this->hasOne('App\Model\Country');
+        return $this->belongsTo('App\Model\Country');
     }
 
     public function sharer()
     {
-        return $this->hasMany('App\Model\Sharer');
+        return $this->belongsTo('App\Model\Sharer');
     }
 }

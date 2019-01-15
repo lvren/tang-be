@@ -6,6 +6,7 @@ use App\Exceptions\ErrorMsgException as Exception;
 use App\Model\Country;
 use App\Model\Order;
 use App\Model\Product;
+use App\Model\School;
 use App\Model\Sharer;
 use App\Model\User;
 use Illuminate\Http\Request;
@@ -21,6 +22,12 @@ class MppBaseInfoController extends Controller
     public function getCountryList(Request $request)
     {
         $country = Country::all();
+        return $this->successResponse($country);
+    }
+    // 获取所有学校列表
+    public function getSchoolList(Request $request)
+    {
+        $country = School::with('country')->get();
         return $this->successResponse($country);
     }
     // 获取所有校友列表

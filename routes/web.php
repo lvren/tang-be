@@ -11,48 +11,52 @@
 |
  */
 
-$router->get('/api/sendCode', 'SmsController@sendSmsCode');
+// $router->get('/api/sendCode', 'SmsController@sendSmsCode');
 
-$router->get('/api/orderNotify', 'OrderController@orderNotify');
-$router->get('/api/checkOrder', 'OrderController@checkOrder');
-$router->get('/api/closeOrder', 'PayController@closeOrder');
-$router->get('/api/payOrder', 'PayController@payOrder');
-$router->get('/api/jsConfig', 'PayController@getJsConfig');
+// $router->get('/api/orderNotify', 'OrderController@orderNotify');
+// $router->get('/api/checkOrder', 'OrderController@checkOrder');
+// $router->get('/api/closeOrder', 'PayController@closeOrder');
+// $router->get('/api/payOrder', 'PayController@payOrder');
+// $router->get('/api/jsConfig', 'PayController@getJsConfig');
 
+// 登录相关
 $router->get('/api/login', 'AuthController@userLogin');
 $router->get('/api/callback', 'AuthController@getUserAccessToken');
 $router->get('/api/isLogin', 'AuthController@isLogin');
 
-$router->get('/api/getPayParam', 'PayController@getPayParam');
-$router->post('/api/saveInfo', 'PayController@saveOrder');
-$router->get('/api/saveInfo', 'PayController@saveOrder');
+// $router->get('/api/getPayParam', 'PayController@getPayParam');
+// $router->post('/api/saveInfo', 'PayController@saveOrder');
+// $router->get('/api/saveInfo', 'PayController@saveOrder');
 
-$router->get('/api/reportVisit', 'ReportController@reportView');
+// $router->get('/api/reportVisit', 'ReportController@reportView');
 
-// 临时接口
-$router->get('/api/getAdvanceUser', 'AuthController@getAdvanceUser');
+$router->get('/api/openid', 'MppAuthController@mAppCode2Session');
+$router->post('/api/saveUserInfo', 'MppAuthController@mAppSaveUserInfo');
 
-$router->get('/mapi/openid', 'MppAuthController@mAppCode2Session');
-$router->post('/mapi/saveUserInfo', 'MppAuthController@mAppSaveUserInfo');
+$router->post('/api/payment', 'MppOrderController@getPayParam');
+$router->get('/api/orderCallback', 'MppOrderController@orderCallback');
 
-$router->post('/mapi/payment', 'MppOrderController@getPayParam');
-$router->get('/mapi/orderCallback', 'MppOrderController@orderCallback');
+$router->get('/api/country', 'MppBaseInfoController@getCountryList');
+$router->get('/api/school', 'MppBaseInfoController@getSchoolList');
+$router->get('/api/sharer', 'MppBaseInfoController@getSharerList');
+$router->get('/api/getReferSharer', 'MppBaseInfoController@getReferSharer');
+$router->get('/api/getReferBySharer', 'MppBaseInfoController@getReferBySharer');
+$router->get('/api/getSharer', 'MppBaseInfoController@getSharerInfo');
+$router->get('/api/getOrderInfo', 'MppBaseInfoController@getOrderInfo');
 
-$router->get('/mapi/country', 'MppBaseInfoController@getCountryList');
-$router->get('/mapi/sharer', 'MppBaseInfoController@getSharerList');
-$router->get('/mapi/getReferSharer', 'MppBaseInfoController@getReferSharer');
-$router->get('/mapi/getReferBySharer', 'MppBaseInfoController@getReferBySharer');
-$router->get('/mapi/getSharer', 'MppBaseInfoController@getSharerInfo');
-$router->get('/mapi/getOrderInfo', 'MppBaseInfoController@getOrderInfo');
+$router->post('/api/add/country', 'AdminController@createCountry');
+$router->post('/api/add/school', 'AdminController@createSchool');
+$router->post('/api/update/country/{id}', 'AdminController@updateCountry');
+$router->post('/api/update/school/{id}', 'AdminController@updateSchool');
 
-$router->get('/mapi/userProduct', 'MppBaseInfoController@getUserProductList');
-$router->get('/mapi/userInfo', 'MppBaseInfoController@getUserInfo');
-$router->get('/mapi/saveMobile', 'MppBaseInfoController@saveUserMobile');
-$router->get('/mapi/saveWeixin', 'MppBaseInfoController@saveUserWeixin');
-$router->get('/mapi/saveNickname', 'MppBaseInfoController@saveUserNickname');
+$router->get('/api/userProduct', 'MppBaseInfoController@getUserProductList');
+$router->get('/api/userInfo', 'MppBaseInfoController@getUserInfo');
+$router->get('/api/saveMobile', 'MppBaseInfoController@saveUserMobile');
+$router->get('/api/saveWeixin', 'MppBaseInfoController@saveUserWeixin');
+$router->get('/api/saveNickname', 'MppBaseInfoController@saveUserNickname');
 
-$router->get('/mapi/sendCode', 'SmsController@sendSmsCode');
+$router->get('/api/sendCode', 'SmsController@sendSmsCode');
 
-$router->get('/mapi/im', 'ImController@sendSmsCode');
-$router->get('/mapi/im/accountImport', 'ImController@accountImport');
-$router->get('/mapi/im/sendToMe', 'ImController@sendToMe');
+$router->get('/api/im', 'ImController@sendSmsCode');
+$router->get('/api/im/accountImport', 'ImController@accountImport');
+$router->get('/api/im/sendToMe', 'ImController@sendToMe');
