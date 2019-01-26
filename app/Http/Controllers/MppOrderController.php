@@ -172,6 +172,11 @@ class MppOrderController extends Controller
             $order->delete();
         }
 
+        // 购买后增加校友人气值
+        $sharer = Sharer::where('id', $order->sharer_id)->first();
+        $sharer->pv = $sharer->pv + 50;
+        $sharer->save();
+
         return ['status' => true, 'message' => '保存order信息成功'];
     }
 

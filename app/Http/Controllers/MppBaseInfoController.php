@@ -56,6 +56,10 @@ class MppBaseInfoController extends Controller
                 }
             }
         }
+        // 每次访问增加校友的人气值
+        $sharer->pv = $sharer->pv + 1;
+        $sharer->save();
+
         return $this->successResponse($sharer);
     }
     // 获取用户的所有订单
@@ -99,8 +103,29 @@ class MppBaseInfoController extends Controller
     public function getUserInfo(Request $request)
     {
         $user = $request->user();
+        if ($user->avatar) {
+            $user->avatar = $this->getUserImg($user->avatar);
+        }
+        if ($user->background) {
+            $user->background = $this->getUserImg($user->background);
+        }
         return ['status' => true, 'data' => $user];
     }
+    // 根据 key 获取存储对象
+    private function getUserImg(Request $request)
+    {
+        $cosClient = new QcloudClient(array(
+            'region' => 'ap-chengdu',
+            'credentials' => array(
+                'secretId' => env('TEC_SECRET_ID'),
+                'secretKey' => env('TEC_SECRET_KEY'),
+            ),
+        ));
+        $bucket = 'talk-' . env('TEC_APP_ID');
+        $signedUrl = $cosClient->getObjectUrl($bucket, $user->avatar, '+10 minutes');
+        return $signedUrl;
+    }
+
     // 绑定手机
     public function saveUserMobile(Request $request)
     {
