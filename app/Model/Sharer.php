@@ -34,6 +34,6 @@ class Sharer extends Model
 
     public function background()
     {
-        return $this->belongsTo('App\Model\Images', 'backgournd_id');
+        return $this->belongsTo('App\Model\Images', 'background_id');
     }
 }

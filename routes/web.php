@@ -48,9 +48,11 @@ $router->get('/api/getBannerList', 'MppBaseInfoController@getBannerList');
 $router->post('/api/add/country', 'AdminController@createCountry');
 $router->post('/api/add/school', 'AdminController@createSchool');
 $router->post('/api/add/banner', 'AdminController@uploadBanner');
+$router->post('/api/add/sharer', 'AdminController@createSharer');
 $router->post('/api/update/country/{id}', 'AdminController@updateCountry');
 $router->post('/api/update/school/{id}', 'AdminController@updateSchool');
 $router->post('/api/update/banner/{id}', 'AdminController@updateBanner');
+$router->post('/api/update/sharer/{id}', 'AdminController@updateSharer');
 
 $router->get('/api/userProduct', 'MppBaseInfoController@getUserProductList');
 $router->get('/api/userInfo', 'MppBaseInfoController@getUserInfo');

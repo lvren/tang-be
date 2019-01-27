@@ -6,6 +6,7 @@ use App\Exceptions\ErrorMsgException as Exception;
 use App\Model\BannerList;
 use App\Model\Country;
 use App\Model\School;
+use App\Model\Sharer;
 use Illuminate\Http\Request;
 
 class AdminController extends Controller
@@ -109,5 +110,47 @@ class AdminController extends Controller
         $bannerList->save();
 
         return $this->successResponse($bannerList);
+    }
+
+    public function createSharer(Request $request)
+    {
+        $avatar = $request->input('avatar');
+        $background = $request->input('background');
+        $desc = $request->input('desc');
+        $intro = $request->input('intro');
+        $name = $request->input('name');
+        $school_id = $request->input('school_id');
+
+        $sharer = new Sharer();
+        $sharer->avatar_id = $avatar;
+        $sharer->background_id = $background;
+        $sharer->desc = $desc;
+        $sharer->intro = $intro;
+        $sharer->name = $name;
+        $sharer->school_id = $school_id;
+        $sharer->save();
+
+        return $this->successResponse($sharer);
+    }
+
+    public function updateSharer(Request $request, string $id)
+    {
+        $avatar = $request->input('avatar');
+        $background = $request->input('background');
+        $desc = $request->input('desc');
+        $intro = $request->input('intro');
+        $name = $request->input('name');
+        $school_id = $request->input('school_id');
+
+        $sharer = Sharer::where('id', $id)->first();
+        $sharer->avatar_id = $avatar;
+        $sharer->background_id = $background;
+        $sharer->desc = $desc;
+        $sharer->intro = $intro;
+        $sharer->name = $name;
+        $sharer->school_id = $school_id;
+        $sharer->save();
+
+        return $this->successResponse($sharer);
     }
 }

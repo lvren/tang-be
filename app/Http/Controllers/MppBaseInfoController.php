@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Exceptions\ErrorMsgException as Exception;
+use App\Model\BannerList;
 use App\Model\Country;
 use App\Model\Order;
 use App\Model\Product;
@@ -10,6 +11,7 @@ use App\Model\School;
 use App\Model\Sharer;
 use App\Model\User;
 use Illuminate\Http\Request;
+use Qcloud\Cos\Client as QcloudClient;
 
 class MppBaseInfoController extends Controller
 {
@@ -33,8 +35,16 @@ class MppBaseInfoController extends Controller
     // 获取所有校友列表
     public function getSharerList(Request $request)
     {
-        $sharer = Sharer::with('school')->get();
-        return $this->successResponse($sharer);
+        $sharers = Sharer::with('school')->get();
+        foreach ($sharers as $key => $sharer) {
+            if ($sharer->avatar) {
+                $sharers[$key]->avatarUrl = $this->getImageUrl($sharer->avatar->key);
+            }
+            if ($sharer->background) {
+                $sharers[$key]->backgroundUrl = $this->getImageUrl($sharer->background->key);
+            }
+        }
+        return $this->successResponse($sharers);
     }
     // 获取校友的详细信息
     public function getSharerInfo(Request $request)
@@ -61,6 +71,12 @@ class MppBaseInfoController extends Controller
             }
         }
 
+        if ($sharer->avatar) {
+            $sharer->avatarUrl = $this->getImageUrl($sharer->avatar->key);
+        }
+        if ($sharer->background) {
+            $sharer->backgroundUrl = $this->getImageUrl($sharer->background->key);
+        }
         return $this->successResponse($sharer);
     }
     // 获取用户的所有订单
@@ -104,23 +120,26 @@ class MppBaseInfoController extends Controller
     public function getUserInfo(Request $request)
     {
         $user = $request->user();
-        if ($user->avatar) {
-            $user->avatar = $this->getUserImg($user->avatar->key);
-        }
-        if ($user->background) {
-            $user->background = $this->getUserImg($user->background->key);
-        }
         return ['status' => true, 'data' => $user];
     }
 
     public function getBannerList(Request $request)
     {
-        $bannerList = BannerList::with('image')->all();
-        return $this->successResponse($bannerList);
+        $bannerList = BannerList::with('image')->get();
+        $banners = [];
+        foreach ($bannerList as $banner) {
+            array_push($banners, [
+                'image' => $this->getImageUrl($banner->image->key),
+                'active' => $banner->active,
+                'id' => $banner->id,
+                'title' => $banner->title,
+            ]);
+        }
+        return $this->successResponse($banners);
     }
 
     // 根据 key 获取存储对象
-    private function getUserImg(Request $request)
+    private function getImageUrl($key)
     {
         $cosClient = new QcloudClient(array(
             'region' => 'ap-chengdu',
@@ -130,7 +149,7 @@ class MppBaseInfoController extends Controller
             ),
         ));
         $bucket = 'talk-' . env('TEC_APP_ID');
-        $signedUrl = $cosClient->getObjectUrl($bucket, $user->avatar, '+10 minutes');
+        $signedUrl = $cosClient->getObjectUrl($bucket, $key, '+10 minutes');
         return $signedUrl;
     }
 
