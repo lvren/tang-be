@@ -36,14 +36,25 @@ class CosController extends Controller
         }
         $file = $request->file('file');
         $key = (string) Str::uuid();
+        $originalName = $file->getClientOriginalName();
         try {
             $result = $this->cosClient->putObject(array(
                 'Bucket' => $this->bucket,
                 'Key' => $key,
                 'Body' => fopen($file, 'rb'),
             ));
+
+            $image = new Images();
+            $image->title = $originalName;
+            $image->key = $key;
+            $image->save();
+
             $signedUrl = $this->cosClient->getObjectUrl($this->bucket, $key, '+10 minutes');
-            return $this->successResponse($signedUrl);
+            return $this->successResponse([
+                'url' => $signedUrl,
+                'key' => $key,
+                'id' => $image->id,
+            ]);
         } catch (\Exception $e) {
             Log::error('上传文件失败');
             throw new Exception('上传文件失败');

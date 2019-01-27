@@ -26,4 +26,14 @@ class Sharer extends Model
     {
         return $this->belongsTo('App\Model\User');
     }
+
+    public function avatar()
+    {
+        return $this->belongsTo('App\Model\Images', 'avatar_id');
+    }
+
+    public function background()
+    {
+        return $this->belongsTo('App\Model\Images', 'backgournd_id');
+    }
 }

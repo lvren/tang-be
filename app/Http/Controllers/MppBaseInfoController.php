@@ -47,6 +47,10 @@ class MppBaseInfoController extends Controller
         if (!$sharer) {
             throw new Exception('没有接受到校友' . $sharerId . '的信息');
         }
+        // 每次访问增加校友的人气值
+        $sharer->pv = $sharer->pv + 1;
+        $sharer->save();
+
         $sharer->has_refer = false;
         if ($sharer->product) {
             $products = $sharer->product;
@@ -56,9 +60,6 @@ class MppBaseInfoController extends Controller
                 }
             }
         }
-        // 每次访问增加校友的人气值
-        $sharer->pv = $sharer->pv + 1;
-        $sharer->save();
 
         return $this->successResponse($sharer);
     }
@@ -104,13 +105,20 @@ class MppBaseInfoController extends Controller
     {
         $user = $request->user();
         if ($user->avatar) {
-            $user->avatar = $this->getUserImg($user->avatar);
+            $user->avatar = $this->getUserImg($user->avatar->key);
         }
         if ($user->background) {
-            $user->background = $this->getUserImg($user->background);
+            $user->background = $this->getUserImg($user->background->key);
         }
         return ['status' => true, 'data' => $user];
     }
+
+    public function getBannerList(Request $request)
+    {
+        $bannerList = BannerList::with('image')->all();
+        return $this->successResponse($bannerList);
+    }
+
     // 根据 key 获取存储对象
     private function getUserImg(Request $request)
     {

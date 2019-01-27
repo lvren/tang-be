@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Exceptions\ErrorMsgException as Exception;
+use App\Model\BannerList;
 use App\Model\Country;
 use App\Model\School;
 use Illuminate\Http\Request;
@@ -26,6 +27,7 @@ class AdminController extends Controller
         $school->save();
         return $this->successResponse($school);
     }
+
     // 修改国家
     public function updateCountry(Request $request, string $id)
     {
@@ -46,6 +48,7 @@ class AdminController extends Controller
         $school->save();
         return $this->successResponse($school);
     }
+
     // 创建学校
     public function createSchool(Request $request)
     {
@@ -58,6 +61,7 @@ class AdminController extends Controller
         $school->save();
         return $this->successResponse($school);
     }
+
     // 修改学校
     public function updateSchool(Request $request, string $id)
     {
@@ -77,5 +81,33 @@ class AdminController extends Controller
         }
         $school->save();
         return $this->successResponse($school);
+    }
+
+    public function uploadBanner(Request $request)
+    {
+        $image_id = $request->input('imageId');
+        $title = $request->input('title');
+
+        $bannerList = new BannerList();
+        $bannerList->active = true;
+        $bannerList->title = $title;
+        $bannerList->image_id = $image_id;
+
+        $bannerList->save();
+
+        return $this->successResponse($bannerList);
+    }
+
+    public function updateBanner(Request $request, string $id)
+    {
+        $active = $request->input('active');
+        $bannerList = BannerList::where('id', $id)->first();
+        if (!$bannerList) {
+            throw new Exception('不存在需要修改的图片');
+        }
+        $bannerList->active = $active;
+        $bannerList->save();
+
+        return $this->successResponse($bannerList);
     }
 }

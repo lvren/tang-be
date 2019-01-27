@@ -43,11 +43,14 @@ $router->get('/api/getReferSharer', 'MppBaseInfoController@getReferSharer');
 $router->get('/api/getReferBySharer', 'MppBaseInfoController@getReferBySharer');
 $router->get('/api/getSharer', 'MppBaseInfoController@getSharerInfo');
 $router->get('/api/getOrderInfo', 'MppBaseInfoController@getOrderInfo');
+$router->get('/api/getBannerList', 'MppBaseInfoController@getBannerList');
 
 $router->post('/api/add/country', 'AdminController@createCountry');
 $router->post('/api/add/school', 'AdminController@createSchool');
+$router->post('/api/add/banner', 'AdminController@uploadBanner');
 $router->post('/api/update/country/{id}', 'AdminController@updateCountry');
 $router->post('/api/update/school/{id}', 'AdminController@updateSchool');
+$router->post('/api/update/banner/{id}', 'AdminController@updateBanner');
 
 $router->get('/api/userProduct', 'MppBaseInfoController@getUserProductList');
 $router->get('/api/userInfo', 'MppBaseInfoController@getUserInfo');

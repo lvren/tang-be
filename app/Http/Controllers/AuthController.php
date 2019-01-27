@@ -44,7 +44,7 @@ class AuthController extends Controller
         // code 微信返回的用来换取 access_token 的code
         $code = $request->input('code');
         // state 是回调跳转地址
-        $state = $request->input('state');
+        $state = $request->input('state', 'http://talktoalumni.com');
 
         $client = new Client([
             'base_uri' => 'https://api.weixin.qq.com',
