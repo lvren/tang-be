@@ -47,19 +47,21 @@ class MppAuthController extends Controller
         // }
         $sessionKey = Str::orderedUuid();
         Cache::forever($sessionKey, json_encode($resJson));
-
-        // $user = User::with('imUser')->where('unionid', $resJson['unionid'])->first();
-        // $hasLogin = true;
-        // if (!$user) {
-        //     $user = new User();
-        //     $user->uuid = $resJson['openid'];
-        //     $user->unionid = isset($resJson['unionid']) ? $resJson['unionid'] : null;
-        //     $user->save();
-        //     $hasLogin = false;
-        // }
-        // if ($user->imUser) {
-        //     $user->imUser->app_id = env('IM_ID');
-        // }
+        $hasLogin = false;
+        $user;
+        if (isset($resJson['unionid'])) {
+            $user = User::with('imUser')->where('unionid', $resJson['unionid'])->first();
+            if (!$user) {
+                $user = new User();
+                $user->uuid = $resJson['openid'];
+                $user->unionid = isset($resJson['unionid']) ? $resJson['unionid'] : null;
+                $user->save();
+            }
+            if ($user->imUser) {
+                $hasLogin = true;
+                $user->imUser->app_id = env('IM_ID');
+            }
+        }
 
         return $this->successResponse([
             'sessionKey' => $sessionKey,
