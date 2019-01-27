@@ -40,29 +40,30 @@ class MppAuthController extends Controller
         if (isset($resJson['errcode']) && $resJson['errcode'] !== 0) {
             throw new Exception('错误码' . $resJson['errcode'] . ';错误信息' . $resJson['errmsg']);
         }
-        if (!isset($resJson['unionid'])) {
-            Log::error('小程序登录失败:没有拿到unionid');
-            throw new Exception('没有请求到小程序的unionid');
-        }
+        // 这个接口不一定能拿到 unionid
+        // if (!isset($resJson['unionid'])) {
+        //     Log::error('小程序登录失败:没有拿到unionid');
+        //     throw new Exception('没有请求到小程序的unionid');
+        // }
         $sessionKey = Str::orderedUuid();
         Cache::forever($sessionKey, json_encode($resJson));
 
-        $user = User::with('imUser')->where('unionid', $resJson['unionid'])->first();
-        $hasLogin = true;
-        if (!$user) {
-            $user = new User();
-            $user->uuid = $resJson['openid'];
-            $user->unionid = isset($resJson['unionid']) ? $resJson['unionid'] : null;
-            $user->save();
-            $hasLogin = false;
-        }
-        if ($user->imUser) {
-            $user->imUser->app_id = env('IM_ID');
-        }
+        // $user = User::with('imUser')->where('unionid', $resJson['unionid'])->first();
+        // $hasLogin = true;
+        // if (!$user) {
+        //     $user = new User();
+        //     $user->uuid = $resJson['openid'];
+        //     $user->unionid = isset($resJson['unionid']) ? $resJson['unionid'] : null;
+        //     $user->save();
+        //     $hasLogin = false;
+        // }
+        // if ($user->imUser) {
+        //     $user->imUser->app_id = env('IM_ID');
+        // }
 
         return $this->successResponse([
             'sessionKey' => $sessionKey,
-            'hasLogin' => $hasLogin,
+            'hasLogin' => false,
             'userInfo' => $user,
         ]);
     }
