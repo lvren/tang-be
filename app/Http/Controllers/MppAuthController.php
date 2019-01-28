@@ -48,7 +48,7 @@ class MppAuthController extends Controller
         $sessionKey = Str::orderedUuid();
         Cache::forever($sessionKey, json_encode($resJson));
         $hasLogin = false;
-        $user;
+        $user = [];
         if (isset($resJson['unionid'])) {
             $user = User::with('imUser')->where('unionid', $resJson['unionid'])->first();
             if (!$user) {
