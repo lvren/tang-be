@@ -58,7 +58,7 @@ class MppAuthController extends Controller
                 $user->imUser->app_id = env('IM_ID');
             }
         } else if (isset($resJson['openid'])) {
-            $user = User::with('imUser')->where('uuid', $resJson['uuid'])->first();
+            $user = User::with('imUser')->where('uuid', $resJson['openid'])->first();
             if (!$user) {
                 $user = new User();
                 $user->uuid = $resJson['openid'];
