@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Exceptions\ErrorMsgException as Exception;
-use App\Http\Components\ImComponent;
 use App\Http\Components\WXBizDataCrypt;
 use App\Model\ImUser;
 use App\Model\User;
@@ -111,23 +110,23 @@ class MppAuthController extends Controller
         $user->avatarUrl = $data['avatarUrl'];
         $user->save();
 
-        $imUser = $user->imUser;
-        if (!$imUser) {
-            $ImComponent = new ImComponent();
-            $api = $ImComponent->createRestAPI();
-            $res = $api->account_import($user->unionid, $user->nickName, $user->avatarUrl);
-            if ($res['ActionStatus'] === 'OK') {
-                $sig = $api->generateUserSig($user->unionid);
-                $imUser = new ImUser();
-                $imUser->user_id = $user->id;
-                $imUser->account = $user->unionid;
-                $imUser->sig = $sig;
-                $imUser->save();
-            }
-        }
-        $imUser->app_id = env('IM_ID');
+        // $imUser = $user->imUser;
+        // if (!$imUser) {
+        //     $ImComponent = new ImComponent();
+        //     $api = $ImComponent->createRestAPI();
+        //     $res = $api->account_import($user->unionid, $user->nickName, $user->avatarUrl);
+        //     if ($res['ActionStatus'] === 'OK') {
+        //         $sig = $api->generateUserSig($user->unionid);
+        //         $imUser = new ImUser();
+        //         $imUser->user_id = $user->id;
+        //         $imUser->account = $user->unionid;
+        //         $imUser->sig = $sig;
+        //         $imUser->save();
+        //     }
+        // }
+        // $imUser->app_id = env('IM_ID');
         $userArr = $user->toArray();
-        $userArr['imUser'] = $imUser;
+        // $userArr['imUser'] = $imUser;
         return $this->successResponse($userArr);
     }
 }
