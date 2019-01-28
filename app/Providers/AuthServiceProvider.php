@@ -5,7 +5,6 @@ namespace App\Providers;
 use App\Model\User;
 use Cache;
 use Illuminate\Support\ServiceProvider;
-use Log;
 
 class AuthServiceProvider extends ServiceProvider
 {
@@ -40,13 +39,11 @@ class AuthServiceProvider extends ServiceProvider
                 return json_decode($userInfo);
             } else if ($sessionKey && Cache::has($sessionKey)) {
                 $userInfo = json_decode(Cache::get($sessionKey));
-                Log::info('通过session换取登录信息:');
-                Log::info($userInfo);
                 // 用登录信息换取用户信息
                 if (isset($userInfo->unionid)) {
                     return User::where('unionid', $userInfo->unionid)->first();
-                } else if (isset($userInfo->uuid)) {
-                    return User::where('uuid', $userInfo->uuid)->first();
+                } else if (isset($userInfo->openid)) {
+                    return User::where('uuid', $userInfo->openid)->first();
                 }
             }
         });
