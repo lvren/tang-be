@@ -41,10 +41,6 @@ class MppAuthController extends Controller
             throw new Exception('错误码' . $resJson['errcode'] . ';错误信息' . $resJson['errmsg']);
         }
         // 这个接口不一定能拿到 unionid
-        // if (!isset($resJson['unionid'])) {
-        //     Log::error('小程序登录失败:没有拿到unionid');
-        //     throw new Exception('没有请求到小程序的unionid');
-        // }
         $sessionKey = Str::orderedUuid();
         Cache::forever($sessionKey, json_encode($resJson));
         $hasLogin = false;
@@ -61,8 +57,19 @@ class MppAuthController extends Controller
                 $hasLogin = true;
                 $user->imUser->app_id = env('IM_ID');
             }
+        } else if (isset($resJson['openid'])) {
+            $user = User::with('imUser')->where('uuid', $resJson['uuid'])->first();
+            if (!$user) {
+                $user = new User();
+                $user->uuid = $resJson['openid'];
+                $user->unionid = isset($resJson['unionid']) ? $resJson['unionid'] : null;
+                $user->save();
+            }
+            if ($user->imUser) {
+                $hasLogin = true;
+                $user->imUser->app_id = env('IM_ID');
+            }
         }
-
         return $this->successResponse([
             'sessionKey' => $sessionKey,
             'hasLogin' => false,
@@ -91,20 +98,19 @@ class MppAuthController extends Controller
         Log::info($data);
         $data = json_decode($data, true);
         $user = User::where('unionid', $data['unionId'])->first();
-        if ($user) {
-            $user->uuid = $data['openId'];
-            $user->unionid = isset($data['unionId']) ? $data['unionId'] : null;
-            $user->nickName = $data['nickName'];
-            $user->avatarUrl = $data['avatarUrl'];
-            $user->save();
-        } else {
-            $user = new User();
-            $user->uuid = $data['openId'];
-            $user->unionid = isset($data['unionid']) ? $data['unionid'] : null;
-            $user->nickName = $data['nickName'];
-            $user->avatarUrl = $data['avatarUrl'];
-            $user->save();
+        if (!$user) {
+            $user = User::where('uuid', $data['openId'])->first();
+            if (!$user) {
+                $user = new User();
+            }
         }
+
+        $user->uuid = $data['openId'];
+        $user->unionid = isset($data['unionId']) ? $data['unionId'] : null;
+        $user->nickName = $data['nickName'];
+        $user->avatarUrl = $data['avatarUrl'];
+        $user->save();
+
         $imUser = $user->imUser;
         if (!$imUser) {
             $ImComponent = new ImComponent();

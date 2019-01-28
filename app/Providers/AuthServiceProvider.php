@@ -42,6 +42,8 @@ class AuthServiceProvider extends ServiceProvider
                 // 用登录信息换取用户信息
                 if (isset($userInfo->unionid)) {
                     return User::where('unionid', $userInfo->unionid)->first();
+                } else if (isset($userInfo->uuid)) {
+                    return User::where('uuid', $userInfo->uuid)->first();
                 }
             }
         });
