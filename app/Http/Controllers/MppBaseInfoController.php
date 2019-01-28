@@ -46,6 +46,7 @@ class MppBaseInfoController extends Controller
         }
         return $this->successResponse($sharers);
     }
+
     // 获取校友的详细信息
     public function getSharerInfo(Request $request)
     {
@@ -79,6 +80,40 @@ class MppBaseInfoController extends Controller
         }
         return $this->successResponse($sharer);
     }
+
+    public function getReferBySharer(Request $request)
+    {
+        $sharerId = $request->input('sharerId');
+        $product = Product::where('type', 'refer')->where('sharer_id', $sharerId)->first();
+
+        return $this->successResponse($product);
+    }
+
+    public function getReferSharer(Request $request)
+    {
+        $sharers = Sharer::with(['school', 'product'])->get();
+        $filterSharers = [];
+        foreach ($sharers as $sharer) {
+            if ($sharer->product) {
+
+                if ($sharer->avatar) {
+                    $sharer->avatarUrl = $this->getImageUrl($sharer->avatar->key);
+                }
+                if ($sharer->background) {
+                    $sharer->backgroundUrl = $this->getImageUrl($sharer->background->key);
+                }
+
+                $products = $sharer->product;
+                foreach ($products as $product) {
+                    if ($product->type === 'refer') {
+                        array_push($filterSharers, $sharer);
+                    }
+                }
+            }
+        }
+        return $this->successResponse($filterSharers);
+    }
+
     // 获取用户的所有订单
     public function getUserProductList(Request $request)
     {
@@ -199,30 +234,5 @@ class MppBaseInfoController extends Controller
         $user->nickname = $nickname;
         $user->save();
         return ['status' => true, 'message' => '修改用户名成功'];
-    }
-
-    public function getReferSharer(Request $request)
-    {
-        $sharers = Sharer::with(['school', 'product'])->get();
-        $filterSharers = [];
-        foreach ($sharers as $sharer) {
-            if ($sharer->product) {
-                $products = $sharer->product;
-                foreach ($products as $product) {
-                    if ($product->type === 'refer') {
-                        array_push($filterSharers, $sharer);
-                    }
-                }
-            }
-        }
-        return $this->successResponse($filterSharers);
-    }
-
-    public function getReferBySharer(Request $request)
-    {
-        $sharerId = $request->input('sharerId');
-        $product = Product::where('type', 'refer')->where('sharer_id', $sharerId)->first();
-
-        return $this->successResponse($product);
     }
 }
