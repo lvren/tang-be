@@ -40,7 +40,9 @@ class AuthServiceProvider extends ServiceProvider
             } else if ($sessionKey && Cache::has($sessionKey)) {
                 $userInfo = json_decode(Cache::get($sessionKey));
                 // 用登录信息换取用户信息
-                return User::where('unionid', $userInfo->unionid)->first();
+                if (isset($userInfo->unionid)) {
+                    return User::where('unionid', $userInfo->unionid)->first();
+                }
             }
         });
     }
