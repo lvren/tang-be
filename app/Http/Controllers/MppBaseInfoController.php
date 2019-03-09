@@ -35,13 +35,16 @@ class MppBaseInfoController extends Controller
     // 获取所有校友列表
     public function getSharerList(Request $request)
     {
+        $withAvatar = $request->input('withAvatar', true);
         $sharers = Sharer::with('school')->get();
-        foreach ($sharers as $key => $sharer) {
-            if ($sharer->avatar) {
-                $sharers[$key]->avatarUrl = $this->getImageUrl($sharer->avatar->key);
-            }
-            if ($sharer->background) {
-                $sharers[$key]->backgroundUrl = $this->getImageUrl($sharer->background->key);
+        if ($withAvatar) {
+            foreach ($sharers as $key => $sharer) {
+                if ($sharer->avatar) {
+                    $sharers[$key]->avatarUrl = $this->getImageUrl($sharer->avatar->key);
+                }
+                if ($sharer->background) {
+                    $sharers[$key]->backgroundUrl = $this->getImageUrl($sharer->background->key);
+                }
             }
         }
         return $this->successResponse($sharers);

@@ -108,10 +108,6 @@ class AuthController extends Controller
         $cookieUuid = Str::orderedUuid();
         Cache::put($cookieUuid, json_encode($constentJson), (int) $constentJson['expires_in']);
         $cookie = new Cookie('talksession', $cookieUuid, time() + (int) $constentJson['expires_in']);
-        if ($state) {
-            return redirect($state)->cookie($cookie);
-        }
-        return response(['message' => '登录成功', 'status' => true])
-            ->cookie($cookie);
+        return redirect($state)->cookie($cookie);
     }
 }
