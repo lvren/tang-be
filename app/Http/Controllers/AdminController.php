@@ -16,6 +16,7 @@ class AdminController extends Controller
     public function __construct()
     {
         $this->middleware('auth');
+        $this->middleware('admin');
     }
 
     // 创建国家
@@ -157,6 +158,16 @@ class AdminController extends Controller
         $this->updateSharerProdcut($sharer, $request->input('productType'));
 
         return $this->successResponse($sharer);
+    }
+
+    public function deleteSharer(Request $request, string $id)
+    {
+        $sharer = Sharer::where('id', $id)->first();
+        if (!$sharer) {
+            throw new Exception("不存在需要删除的校友");
+        }
+        $state = $sharer->delete();
+        return $this->successResponse($state);
     }
 
     private function updateSharerProdcut($sharer, $productType)

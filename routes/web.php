@@ -60,6 +60,8 @@ $router->post('/api/update/school/{id}', 'AdminController@updateSchool');
 $router->post('/api/update/banner/{id}', 'AdminController@updateBanner');
 $router->post('/api/update/sharer/{id}', 'AdminController@updateSharer');
 
+$router->get('/api/delete/sharer/{id}', 'AdminController@deleteSharer');
+
 $router->get('/api/userProduct', 'MppBaseInfoController@getUserProductList');
 $router->get('/api/userInfo', 'MppBaseInfoController@getUserInfo');
 $router->get('/api/saveMobile', 'MppBaseInfoController@saveUserMobile');

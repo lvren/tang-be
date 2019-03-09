@@ -17,7 +17,9 @@ class AuthController extends Controller
     {
         $user = $request->user();
         if ($user) {
-            Log::info(json_encode($user));
+            if (!$user->isAdmin) {
+                return response('用户权限', 403)->header('Content-Type', 'text/plain');
+            }
             return ['status' => true, 'message' => '存在用户登录信息'];
         }
         return response('用户未登录', 401)->header('Content-Type', 'text/plain');
