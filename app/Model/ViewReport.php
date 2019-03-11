@@ -12,9 +12,10 @@ class ViewReport extends Model
     protected $table = 'view_report';
 
     protected $dates = ['deleted_at', 'created_at', 'updated_at'];
+    protected $hidden = ['deleted_at'];
     // 分享者的信息
     public function user()
     {
-        return $this->hasOne('App\User');
+        return $this->hasOne('App\Model\User');
     }
 }

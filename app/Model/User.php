@@ -9,11 +9,28 @@ class User extends Model
 {
     use SoftDeletes;
     protected $dates = ['deleted_at', 'created_at', 'updated_at'];
+    protected $hidden = ['deleted_at'];
     protected $table = 'user';
 
-    // 当前分享的分享产品
+    // 用户订单
     public function order()
     {
-        return $this->hasMany('App\Order');
+        return $this->hasMany('App\Model\Order');
+    }
+
+    // 用户的评论
+    public function evaludate()
+    {
+        return $this->hasMany('App\Model\Evaluate');
+    }
+
+    public function imUser()
+    {
+        return $this->hasOne('App\Model\ImUser');
+    }
+
+    public function sharer()
+    {
+        return $this->hasOne('App\Model\Sharer');
     }
 }

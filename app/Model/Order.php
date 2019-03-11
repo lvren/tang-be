@@ -12,15 +12,17 @@ class Order extends Model
     protected $table = 'order';
 
     protected $dates = ['deleted_at', 'created_at', 'updated_at'];
-    // 分享者的信息
+    protected $hidden = ['deleted_at'];
+
+    // 购买用户
     public function user()
     {
-        return $this->hasOne('App\User');
+        return $this->belongsTo('App\Model\User');
     }
 
-    // 分享者的信息
+    // 产品详情
     public function product()
     {
-        return $this->hasOne('App\Product');
+        return $this->belongsTo('App\Model\Product');
     }
 }

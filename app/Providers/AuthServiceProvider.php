@@ -2,8 +2,7 @@
 
 namespace App\Providers;
 
-use App\User;
-use Illuminate\Support\Facades\Gate;
+use App\Model\User;
 use Cache;
 use Illuminate\Support\ServiceProvider;
 
@@ -33,13 +32,25 @@ class AuthServiceProvider extends ServiceProvider
 
         $this->app['auth']->viaRequest('api', function ($request) {
             $session = $request->cookie('talksession');
+            $sessionKey = $request->input('sessionKey');
+
             if ($session && Cache::has($session)) {
-                $userInfo = Cache::get($session);
-                return json_decode($userInfo);
+                $userInfo = json_decode(Cache::get($session));
+                // 用登录信息换取用户信息
+                if (isset($userInfo->unionid)) {
+                    return User::where('unionid', $userInfo->unionid)->first();
+                } else if (isset($userInfo->openid)) {
+                    return User::where('uuid', $userInfo->openid)->first();
+                }
+            } else if ($sessionKey && Cache::has($sessionKey)) {
+                $userInfo = json_decode(Cache::get($sessionKey));
+                // 用登录信息换取用户信息
+                if (isset($userInfo->unionid)) {
+                    return User::where('unionid', $userInfo->unionid)->first();
+                } else if (isset($userInfo->openid)) {
+                    return User::where('uuid', $userInfo->openid)->first();
+                }
             }
-            // if ($request->input('api_token')) {
-            //     return User::where('api_token', $request->input('api_token'))->first();
-            // }
         });
     }
 }

@@ -7,8 +7,12 @@ use Illuminate\Http\Request;
 use Log;
 use SoapBox\Formatter\Formatter;
 
+/**
+ * OrderController 订单相关处理
+ */
 class OrderController extends Controller
 {
+    // 提供给腾讯端的支付异步回调接口
     public function orderNotify(Request $request)
     {
         $responseCode = 'SUCCESS';
@@ -54,6 +58,7 @@ class OrderController extends Controller
         exit();
     }
 
+    // 检查订单的支付状态
     public function checkOrder(Request $request)
     {
         $orderId = $request->input('order');
