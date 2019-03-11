@@ -29,7 +29,7 @@ class AuthController extends Controller
     {
         $redirectUrl = $request->input('redirect');
         $appid = env('WEB_ID');
-        $redirect = 'http://talktoalumni.com/api/callback';
+        $redirect = 'https://talktoalumni.com/api/callback';
         $api = 'https://open.weixin.qq.com/connect/qrconnect?';
         $api .= "appid={$appid}&";
         $api .= "redirect_uri={$redirect}&";
@@ -46,7 +46,7 @@ class AuthController extends Controller
         // code 微信返回的用来换取 access_token 的code
         $code = $request->input('code');
         // state 是回调跳转地址
-        $state = $request->input('state', 'http://talktoalumni.com');
+        $state = $request->input('state', 'https://talktoalumni.com');
 
         $client = new Client([
             'base_uri' => 'https://api.weixin.qq.com',
