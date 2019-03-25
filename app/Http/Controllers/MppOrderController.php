@@ -12,7 +12,6 @@ use App\Model\Order;
 use App\Model\Product;
 use App\Model\Sharer;
 use App\Model\User;
-use Cache;
 use GuzzleHttp\Client;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
@@ -20,26 +19,33 @@ use Log;
 
 class MppOrderController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('auth');
+    }
+
     // 获取支付配置接口
     public function getPayParam(Request $request)
     {
-        $sessionKey = $request->input('sessionKey');
+        // $sessionKey = $request->input('sessionKey');
         $product = $request->input('product');
         $number = $request->input('number', 1);
         $orderId = $request->input('order');
         // 拿到自己生成的sessionKey，获取登录信息
-        $sessionInfo = Cache::get($sessionKey);
-        if (!$sessionInfo) {
-            return ['status' => false, 'message' => '用户登录信息失效'];
-        }
-        $sessionInfo = json_decode($sessionInfo, true);
-        // 用登录信息换取用户信息
-        $unionid = $sessionInfo['unionId'];
-        $openid = $sessionInfo['openid'];
-        $user = User::where('unionid', $unionid)->first();
-        if (!$user) {
-            return ['status' => false, 'message' => '获取用户信息失败'];
-        }
+        // $sessionInfo = Cache::get($sessionKey);
+        // if (!$sessionInfo) {
+        //     return ['status' => false, 'message' => '用户登录信息失效'];
+        // }
+        // $sessionInfo = json_decode($sessionInfo, true);
+        // // 用登录信息换取用户信息
+        // $unionid = $sessionInfo['unionId'];
+        // $user = User::where('unionid', $unionid)->first();
+        // if (!$user) {
+        //     return ['status' => false, 'message' => '获取用户信息失败'];
+        // }
+        $user = $request->user();
+        $openid = $user->openid;
+
         // 获取产品信息
         if (!$product) {
             throw new Exception('没有指定购买的产品');
@@ -139,20 +145,21 @@ class MppOrderController extends Controller
         $orderStatus = $request->input('status');
         $transactionId = $request->input('transactionId');
         $errorMsg = $request->input('errorMsg');
+        $user = $request->user();
 
-        $sessionKey = $request->input('sessionKey');
-        // 拿到自己生成的sessionKey，获取登录信息
-        $sessionInfo = Cache::get($sessionKey);
-        if (!$sessionInfo) {
-            throw new Exception('用户登录信息失效');
-        }
-        // 用登录信息换取用户信息
-        $sessionInfo = json_decode($sessionInfo, true);
-        $unionid = $sessionInfo['unionId'];
-        $user = User::where('unionid', $unionid)->first();
-        if (!$user) {
-            return ['status' => false, 'message' => '获取用户信息失败'];
-        }
+        // $sessionKey = $request->input('sessionKey');
+        // // 拿到自己生成的sessionKey，获取登录信息
+        // $sessionInfo = Cache::get($sessionKey);
+        // if (!$sessionInfo) {
+        //     throw new Exception('用户登录信息失效');
+        // }
+        // // 用登录信息换取用户信息
+        // $sessionInfo = json_decode($sessionInfo, true);
+        // $unionid = $sessionInfo['unionId'];
+        // $user = User::where('unionid', $unionid)->first();
+        // if (!$user) {
+        //     return ['status' => false, 'message' => '获取用户信息失败'];
+        // }
 
         $order = Order::where('user_id', $user->id)
             ->where('id', $orderId)
