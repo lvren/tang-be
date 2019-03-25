@@ -27,22 +27,10 @@ class MppOrderController extends Controller
     // 获取支付配置接口
     public function getPayParam(Request $request)
     {
-        // $sessionKey = $request->input('sessionKey');
         $product = $request->input('product');
         $number = $request->input('number', 1);
         $orderId = $request->input('order');
-        // 拿到自己生成的sessionKey，获取登录信息
-        // $sessionInfo = Cache::get($sessionKey);
-        // if (!$sessionInfo) {
-        //     return ['status' => false, 'message' => '用户登录信息失效'];
-        // }
-        // $sessionInfo = json_decode($sessionInfo, true);
-        // // 用登录信息换取用户信息
-        // $unionid = $sessionInfo['unionId'];
-        // $user = User::where('unionid', $unionid)->first();
-        // if (!$user) {
-        //     return ['status' => false, 'message' => '获取用户信息失败'];
-        // }
+
         $user = $request->user();
         $openid = $user->openid;
 
@@ -91,6 +79,8 @@ class MppOrderController extends Controller
 
             $config = new PayConfig();
             $unifiedOrder = WxPayApi::unifiedOrder($config, $input);
+            Log::info('支付参数:');
+            Log::info($unifiedOrder);
             $jsApiParameters = $this->getJsApiParameters($unifiedOrder);
 
             $order = new Order();
@@ -146,20 +136,6 @@ class MppOrderController extends Controller
         $transactionId = $request->input('transactionId');
         $errorMsg = $request->input('errorMsg');
         $user = $request->user();
-
-        // $sessionKey = $request->input('sessionKey');
-        // // 拿到自己生成的sessionKey，获取登录信息
-        // $sessionInfo = Cache::get($sessionKey);
-        // if (!$sessionInfo) {
-        //     throw new Exception('用户登录信息失效');
-        // }
-        // // 用登录信息换取用户信息
-        // $sessionInfo = json_decode($sessionInfo, true);
-        // $unionid = $sessionInfo['unionId'];
-        // $user = User::where('unionid', $unionid)->first();
-        // if (!$user) {
-        //     return ['status' => false, 'message' => '获取用户信息失败'];
-        // }
 
         $order = Order::where('user_id', $user->id)
             ->where('id', $orderId)
