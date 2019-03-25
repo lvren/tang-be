@@ -2,6 +2,8 @@
 
 namespace App\Http\Lib\WxPay;
 
+use Exception;
+
 /**
  *
  * 微信支付API异常类
