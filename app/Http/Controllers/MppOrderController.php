@@ -34,6 +34,9 @@ class MppOrderController extends Controller
         $user = $request->user();
         $openid = $user->openid;
 
+        Log::info('支付用户:');
+        Log::info($user);
+
         // 获取产品信息
         if (!$product) {
             throw new Exception('没有指定购买的产品');
