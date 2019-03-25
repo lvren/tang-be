@@ -32,7 +32,7 @@ class MppOrderController extends Controller
         $orderId = $request->input('order');
 
         $user = $request->user();
-        $openid = $user->openid;
+        $openid = $user->uuid;
 
         Log::info('支付用户:');
         Log::info($user);
