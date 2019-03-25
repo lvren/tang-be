@@ -10,6 +10,7 @@ use App\Http\Lib\WxPay\WxPayData\WxPayUnifiedOrder;
 use App\Http\Lib\WxPay\WxPayException;
 use App\Model\Order;
 use App\Model\Product;
+use App\Model\Sharer;
 use App\Model\User;
 use Cache;
 use GuzzleHttp\Client;
@@ -33,7 +34,7 @@ class MppOrderController extends Controller
         }
         $sessionInfo = json_decode($sessionInfo, true);
         // 用登录信息换取用户信息
-        $unionid = $sessionInfo['unionid'];
+        $unionid = $sessionInfo['unionId'];
         $openid = $sessionInfo['openid'];
         $user = User::where('unionid', $unionid)->first();
         if (!$user) {
@@ -147,7 +148,7 @@ class MppOrderController extends Controller
         }
         // 用登录信息换取用户信息
         $sessionInfo = json_decode($sessionInfo, true);
-        $unionid = $sessionInfo['unionid'];
+        $unionid = $sessionInfo['unionId'];
         $user = User::where('unionid', $unionid)->first();
         if (!$user) {
             return ['status' => false, 'message' => '获取用户信息失败'];
