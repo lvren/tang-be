@@ -102,3 +102,5 @@ $app->router->group([
 });
 
 return $app;
+
+// add command
