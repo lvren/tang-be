@@ -76,5 +76,3 @@ $router->get('/api/download', 'CosController@download');
 $router->get('/api/im', 'ImController@sendSmsCode');
 $router->get('/api/im/accountImport', 'ImController@accountImport');
 $router->get('/api/im/sendToMe', 'ImController@sendToMe');
-
-// test
